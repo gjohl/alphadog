@@ -1,0 +1,8 @@
+README.txt
+setup.py
+alphadog/__init__.py
+alphadog.egg-info/PKG-INFO
+alphadog.egg-info/SOURCES.txt
+alphadog.egg-info/dependency_links.txt
+alphadog.egg-info/requires.txt
+alphadog.egg-info/top_level.txt
