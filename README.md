@@ -142,7 +142,13 @@ If more than 10% away from target, trade to the target.
 ### Plan
 - Create strategies to contain the parameterised versions of the signal that will be run.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
-
+- Implement the Forecast class for a momentum strategy with 3 speeds
+- Create a second strategy (mean reversion? open to close?) to implement in the Instrument class
+- Get data from yfinance and quandl
+- Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
+  later FundamentalData, MacroData etc will be consistent?
+- Implement Instrument class
+- Implement Portfolio class
 
 ### Done
 - Refactor strategies as signals, which will have the raw signal functions.
