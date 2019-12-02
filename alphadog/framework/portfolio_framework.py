@@ -23,7 +23,7 @@ class Portfolio:
         pass
 
 
-class Instrument:
+class InstrumentForecast:
     """
     Contains all strategies (Forecast objects) and related parameters for a particular instrument.
 
