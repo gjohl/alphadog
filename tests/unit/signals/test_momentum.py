@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from alphadog.strategies.momentum import momentum_signal
+from alphadog.signals.momentum import momentum_signal
 from alphadog.helpers.exceptions import ParameterError
 
 

@@ -1,7 +1,0 @@
-"""
--- momentum
--- carry
--- value
--- fundamental
-
-"""

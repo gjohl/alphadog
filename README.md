@@ -4,12 +4,12 @@ Module for systematic trading signals.
 
 
 
-# Instruments
+## Instruments
 Start with ETFs, then try single stocks.
 Read leveraged trading for ideas on CFDs and spread betting.
 
 
-# Forecasts
+## Forecasts
 In units of risk-adjusted returns (Sharpe ratio).
 Scale so that average long signal is +10, average short is -10.
 Spline extreme values to +-20. Think about scaling back to 10/15 at very extreme values.
@@ -18,7 +18,7 @@ AVG_FORECAST = 10
 Allow discretionary forecasts to have a section of the strategy.
 Rate a security on this +-20 scale.
 
-## Adding new trading rules
+### Adding new trading rules
 - Convert ideas into a continuous rule (not a binary buy/sell).
 - Vol scale so that forecasts are comparable across markets and data can be pooled.
 - Find the forecast scalar `f_weight` by looking at the distribution of historical forecasts
@@ -27,7 +27,7 @@ Rate a security on this +-20 scale.
 
 
 
-# Combined forecasts
+## Combined forecasts
 Handcraft weights (or bootstrap based on historical covariances and expected returns.
 
 Level 1 - split by trading rule, e.g. ewmac vs carry
@@ -41,7 +41,7 @@ Spline again.
 
 
 
-# Volatility targeting
+## Volatility targeting
 Half-Kelly criterion.
 Rule of thumb - vol target is half of expected Sharpe ratio
 Negative skew makes expected losses worse than vol would suggest
@@ -67,8 +67,8 @@ cash_vol_target_daily = cash_vol_annualised / sqrt(252)
 
 
 
-# Position Sizing
-## Instrument Block
+## Position Sizing
+### Instrument Block
 An instrument block is defined "one unit of that instrument". The block value is "how much you gain
 or lose if the instrument's price changes by 1%".
  This varies by asset class:
@@ -78,23 +78,23 @@ or lose if the instrument's price changes by 1%".
 - FX futures - Price is 100 - interest rate. Account for quarterly contracts with day count.
                Notional * 1% of price * (days/365)
 
-## Price Volatility
+### Price Volatility
 The above considers a 1% price move but doesn't account for the likelihood of a 1% price move.
 More volatile instruments are more likely to experience a 1% move, so vol normalise again.
 Measure price volatility: the standard deviation of prices of some lookback. 5 weeks (25 days) is
 a standard lookback period.
 
-## Instrument Currency Volatility
+### Instrument Currency Volatility
 The expected standard deviation of daily returns from owning one instrument block in the currency
 of the instrument.
 instrument_currency_vol = block_value * price_vol
 
-## Instrument Value Volatility
+### Instrument Value Volatility
 The instrument may not be in the same currency as your trading account, so convert to the
 currency of the trading account. Make sure the currency conversion is the correct way around.
 instrument_value_vol = instrument_currency_vol * fx_rate
 
-## Position
+### Position
 Instrument value volatility gives the vol contribution per block of the instrument.
 Ignoring forecasts for the moment, the vol_scalar gives the number of blocks to buy to achieve the
 vol target using this instrument alone.
@@ -107,8 +107,8 @@ subsystem_position = vol_scalar * (instrument_forecast / AVG_FORECAST)
 
 
 
-# Portfolios
-## Instrument weights
+## Portfolios
+### Instrument weights
 Instrument weights determine how much to allocate to each trading subsystem.
 Do this from handcrafting or bootstrapping.
 
@@ -116,36 +116,47 @@ Need the correlations between trading subsystem returns, not the correlations be
 returns. As an approximation, the correlation between subsystem returns is 0.7 of the correlation
 of instrument returns.
 
-## Instrument diversification multiplier
+### Instrument diversification multiplier
 Apply an instrument diversification multiplier to account for the decrease in vol from diversifying across instruments. Calculate this as 1/sqrt(WHWt). See p 297.
 
 Limit the value of the multiplier to 2.5.
 
-## Portfolio instrument position
+### Portfolio instrument position
 = Subsystem position * instrument weight * instrument diversification multiplier
 
-## Generating trades
-Rounded_target_position = round(portfolio_instrument_position
+### Generating trades
+Rounded_target_position = round(portfolio_instrument_position)
 
 If this is within 10% of the current position, make no change. This is position inertia or buffering.
 If more than 10% away from target, trade to the target.
 
 
-# Data Sources
+## TODO
+### Data Sources
 - quandl
 - fix yahoo finance
 - eoddata?
--
 
 
-# Plan
-- Refactor strategies as signals, which will have the raw signal functions.
+
+### Plan
 - Create strategies to contain the parameterised versions of the signal that will be run.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
+
+
+### Done
+- Refactor strategies as signals, which will have the raw signal functions.
 - Create framework folder to handle forecast scaling, diversification multipliers, weights etc.
 
 
-# To Read:
+
+## To Read:
 - Kelly Criterion
 - Perry Kaufman signals book
 - Leverage trading
+
+
+## Future modules:
+- evaluation - maybe roll this into portfolio_management
+- execution - once trading is automated
+- risk

@@ -1,0 +1,35 @@
+# python
+*.pyc
+.coverage
+__pycache__
+
+# pycharm
+.idea
+*/.idea
+*.iml
+
+# eclipse
+.project
+.pydevproject
+
+# files
+*.log
+*.gz
+*.zip
+junit.xml
+clover.xml
+coverage.xml
+
+# directories
+*.egg-info/
+docs
+.cache
+.pytest_cache
+.benchmarks
+
+# wheels
+*.whl
+
+# pytest
+.pytest_cache
+.cache

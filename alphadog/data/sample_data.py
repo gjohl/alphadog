@@ -1,8 +1,8 @@
 """
-Functions to generate characteristic data to test the "shape" of a trading rule without wasting sample data.
+Functions to generate characteristic data to test the "shape" of a trading rule without
+wasting sample data.
 """
 import numpy as np
-import pandas as pd
 
 
 def sample_from_distribution(distribution_type="normal", *args, **kwargs):

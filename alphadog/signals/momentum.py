@@ -1,5 +1,4 @@
-import numpy as np
-import pandas as pd
+# import pandas as pd
 
 from ..helpers.exceptions import ParameterError
 
@@ -48,5 +47,5 @@ def carry_signal():
     -------
 
     """
-    #TODO
+    # TODO
     pass
