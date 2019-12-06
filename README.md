@@ -21,7 +21,7 @@ Rate a security on this +-20 scale.
 ### Adding new trading rules
 - Convert ideas into a continuous rule (not a binary buy/sell).
 - Vol scale so that forecasts are comparable across markets and data can be pooled.
-- Find the forecast scalar `f_weight` by looking at the distribution of historical forecasts
+- Find the forecast scalar by looking at the distribution of historical forecasts
   (without looking at backtested _performance_) and setting the scalar so that the average absolute
   value is 10.
 

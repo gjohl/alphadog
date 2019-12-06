@@ -3,6 +3,7 @@ Systematic framework.
 
 Largely follows the methodology in Systematic Trading, Robert Carver.
 """
+from .constants import AVG_FORECAST, MIN_FORECAST, MAX_FORECAST
 
 
 class Portfolio:
@@ -49,10 +50,10 @@ class Forecast:
     """
     Calculate a single strategy on a particular Instrument.
 
-    Takes a generic data object which is whatever data the forecast uses. This does not have to be
+    Takes generic params which is signal function requires to run. This does not have to be
     a price timeseries; could be fundamental data, machine learned features/parameters.
 
-    The signal function can then take this and return a timeseries o
+    The signal function can then take this and return a timeseries of forecasts.
 
     Contains signals and related parameters:
     - signal function and parameters (Strategy)
@@ -61,5 +62,28 @@ class Forecast:
     - capped_forecast
     - f_weight? Don't thinks so, but we'll see
     """
-    def __init__(self, data):
-        pass
+    def __init__(self, signal_func, params, instrument_id, name):
+        """
+        Initialise the forecast with a given function, parameters and optional name.
+
+        Parameters
+        ----------
+        signal_func: function
+            Function to run fo the signal
+        params: dict
+            Kwargs to pass to the function
+        instrument_id: str
+            Identifier for the instrument
+        name: str
+            Forecast name to identify this signal
+        """
+        self.signal_func = signal_func
+        self.params = params
+        self.instrument_id = instrument_id
+        self.name = name
+
+        # Run the strategy
+        self.raw_forecast = self.signal_func(**self.params)
+        self.forecast_scalar = AVG_FORECAST / self.raw_forecast.mean()
+        self.scaled_forecast = self.raw_forecast * self.forecast_scalar
+        self.capped_forecast = self.scaled_forecast.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)

@@ -1,4 +1,11 @@
+cufflinks
+lxml
 numpy
 pandas
+plotly
+plotly-express
 pytest
+quandl
 scipy
+sklearn
+yfinance
