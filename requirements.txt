@@ -2,6 +2,7 @@ cufflinks
 lxml
 numpy
 pandas
+pandas-datareader
 plotly
 plotly-express
 pytest

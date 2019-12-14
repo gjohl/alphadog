@@ -8,6 +8,19 @@ Module for systematic trading signals.
 Start with ETFs, then try single stocks.
 Read leveraged trading for ideas on CFDs and spread betting.
 
+ETFs:
+Equity
+- UK
+
+Bonds
+
+Commodities
+
+Real Estate
+
+Crypto
+
+
 
 ## Forecasts
 In units of risk-adjusted returns (Sharpe ratio).
@@ -140,11 +153,10 @@ If more than 10% away from target, trade to the target.
 
 
 ### Plan
+- Add tests for breakout
 - Create strategies to contain the parameterised versions of the signal that will be run.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
 - Implement the Forecast class for a momentum strategy with 3 speeds
-- Create a second strategy (mean reversion? open to close?) to implement in the InstrumentForecast
-  class
 - Get data from yfinance and quandl
 - Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
   later FundamentalData, MacroData etc will be consistent?
@@ -158,7 +170,8 @@ If more than 10% away from target, trade to the target.
  ### Done
 - Refactor strategies as signals, which will have the raw signal functions.
 - Create framework folder to handle forecast scaling, diversification multipliers, weights etc.
-
+- Create a second strategy (mean reversion? open to close?) to implement in the InstrumentForecast
+  class. Created breakout signal
 
 
 ## To Read:

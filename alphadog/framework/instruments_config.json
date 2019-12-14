@@ -1,0 +1,25 @@
+{
+  "equity": {
+    "developed": {},
+    "emerging": {}
+  },
+
+  "bonds": {
+    "government": {},
+    "corporate": {}
+  },
+
+  "commodities": {
+
+  },
+
+  "real_estate": {
+    "residential": {},
+    "commercial": {}
+
+  },
+
+  "crypto": {
+
+  }
+}

@@ -54,13 +54,6 @@ class Forecast:
     a price timeseries; could be fundamental data, machine learned features/parameters.
 
     The signal function can then take this and return a timeseries of forecasts.
-
-    Contains signals and related parameters:
-    - signal function and parameters (Strategy)
-    - raw_forecast
-    - scaled_forecast
-    - capped_forecast
-    - f_weight? Don't thinks so, but we'll see
     """
     def __init__(self, signal_func, params, instrument_id, name):
         """
@@ -69,7 +62,7 @@ class Forecast:
         Parameters
         ----------
         signal_func: function
-            Function to run fo the signal
+            Function to run the signal
         params: dict
             Kwargs to pass to the function
         instrument_id: str
