@@ -38,7 +38,7 @@ def momentum_signal(df, fast, slow):
     return (fast_ewma - slow_ewma) / ewvol
 
 
-def breakout(df, lookback_period, smooth_period=None):
+def breakout_signal(df, lookback_period, smooth_period=None):
     """
     A continuous breakout signal that indicates when the data is nearing an extreme relative
     to its recent history (rolling min or max).
@@ -57,7 +57,7 @@ def breakout(df, lookback_period, smooth_period=None):
     Thus, we can scale here to get an a priori scaled signal. We will still scale in the framework,
     but this allows us to sanity check the signal as those scaling factors should then be close
     to 1.
-    scaled_breakout = max_forecast_rangev* raw_breakout
+    scaled_breakout = max_forecast_range * raw_breakout
 
     We smooth the forecast to slow down it down to a sensible speed. The raw forecast inherits the
     speed of the current data, i.e. it moves with daily price. This is unreasonably fast since the
@@ -100,7 +100,7 @@ def breakout(df, lookback_period, smooth_period=None):
     min_smooth_periods = int(np.ceil(smooth_period / 2))
 
     rolling_max = df.rolling(lookback_period, min_periods=min_lookback_periods).max()
-    rolling_min = df.rolling(lookback_period, min_periods=min_lookback_periods).max()
+    rolling_min = df.rolling(lookback_period, min_periods=min_lookback_periods).min()
     rolling_midpoint = (rolling_max + rolling_min) / 2
 
     # Calculate breakout signal, scale by natural scaling and slow down
