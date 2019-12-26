@@ -3,23 +3,56 @@
 Module for systematic trading signals.
 
 
-
 ## Instruments
 Start with ETFs, then try single stocks.
 Read leveraged trading for ideas on CFDs and spread betting.
 
-ETFs:
-Equity
-- UK
+Eventually the multi-asset portfolio will include:
+- Equity
+- Bonds
+- Commodities
+- Real Estate
+- Crypto
 
-Bonds
+To begin with, we'll get the instruments we will use are ETFs or funds for equity and bonds, with some mix of geographies to build out the multi-level portfolio functionality of the framework.
 
-Commodities
+The general framework will be:
+- Asset class
+-- Country
+--- Sector
 
-Real Estate
+Initally this will be as follows. 
 
-Crypto
+- Equity
+-- UK
+-- US
+-- Eurostoxx
 
+- Bonds
+-- US
+--- gov
+--- corporate
+
+--UK
+--- gov
+--- corporate
+
+Choose an instrument to get representative data on:
+- UK equity
+- US equity
+- Eurostoxx equity
+
+- US treasuries
+- US corporate bonds
+- UK gilts
+- UK corporate bonds
+
+
+The criteria for choosing an instrument are:
+- Data available from yfinance (and preferably also quandl)
+- Big, liquid instrument
+- Low trading costs. For now, as an MVP, this will be judged by the cost of trading in a
+  Hargreaves Lansdowne account but later I'll make other broker accounts if it is worthwhile.
 
 
 ## Forecasts
@@ -153,11 +186,11 @@ If more than 10% away from target, trade to the target.
 
 
 ### Plan
-- Add tests for breakout
+- Get data from yfinance 
+- Choose instruments
 - Create strategies to contain the parameterised versions of the signal that will be run.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
 - Implement the Forecast class for a momentum strategy with 3 speeds
-- Get data from yfinance and quandl
 - Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
   later FundamentalData, MacroData etc will be consistent?
 - Implement InstrumentForecast class
@@ -166,18 +199,21 @@ If more than 10% away from target, trade to the target.
   long_name, asset_class, currency, p_weight?, market_data call and params
 - data_retrieval should handle periodic/daily retrieval of new data nd save to some database
   (CSV file for now?). The signals should all read their data from this database. 
+- Get data from quandl
+- Bulk out technical indicators using ta-lib
   
  ### Done
 - Refactor strategies as signals, which will have the raw signal functions.
 - Create framework folder to handle forecast scaling, diversification multipliers, weights etc.
 - Create a second strategy (mean reversion? open to close?) to implement in the InstrumentForecast
-  class. Created breakout signal
+  class. Created breakout signal.
+- Add tests for breakout
 
 
 ## To Read:
 - Kelly Criterion
 - Perry Kaufman signals book
-- Leverage trading
+- Leveraged trading
 
 
 ## Future modules:
