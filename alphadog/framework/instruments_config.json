@@ -1,12 +1,87 @@
 {
   "equity": {
-    "developed": {},
-    "emerging": {}
+    "uk": {
+      "ftse100": {
+        "traded_instrument": "LEGAL & GENERAL UK 100 INDEX TRUST",
+        "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/l/legal-and-general-uk-100-index-class-c-accumulation",
+        "cost": 6,
+        "index": "FTSE 100",
+        "yfinance_index_symbol": "^FTSE",
+        "yfinance_index_link": "https://uk.finance.yahoo.com/quote/%5EFTSE?p=^FTSE",
+        "is_traded": true
+      },
+      "ftse250": {
+        "traded_instrument": "HSBC FTSE 250 INDEX",
+        "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hsbc-ftse-250-index-class-s-accumulation",
+        "cost": 8,
+        "index": "FTSE 250",
+        "yfinance_traded_symbol": "0P0000WN7D.L",
+        "yfinance_traded_link": "https://uk.finance.yahoo.com/quote/0P0000WN7D.L?p=0P0000WN7D.L",
+        "yfinance_index_symbol": "^FTMC",
+        "yfinance_index_link": "https://uk.finance.yahoo.com/quote/%5EFTMC?p=^FTMC",
+        "is_traded": true
+      },
+      "ftseall": {
+        "traded_instrument": "LEGAL & GENERAL UK INDEX",
+        "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/l/legal-and-general-uk-index-class-c-accumulation",
+        "cost": 4,
+        "index": "FTSE All Share",
+        "yfinance_index_symbol": "^FTAS",
+        "yfinance_index_link": "https://uk.finance.yahoo.com/quote/%5EFTAS?p=^FTAS",
+        "is_traded": true
+      },
+    },
+
+//# TODO
+
+    "us": {
+      "traded_instrument": 1,
+      "cost": 100,
+      "index": "S&P 500"
+    },
+    "europe": {
+      "traded_instrument": 1,
+      "cost": 100,
+      "index": "FTSE 100"
+    }
   },
 
   "bonds": {
-    "government": {},
-    "corporate": {}
+    "government": {
+      "uk": {
+        "traded_instrument": 1,
+        "cost": 100,
+        "index": "FTSE 100"
+      },
+      "us": {
+        "traded_instrument": 1,
+        "cost": 100,
+        "index": "FTSE 100"
+      },
+      "europe": {
+        "traded_instrument": 1,
+        "cost": 100,
+        "index": "FTSE 100"
+      }
+
+    },
+    "corporate": {
+      "uk": {
+        "traded_instrument": 1,
+        "cost": 100,
+        "index": "FTSE 100"
+      },
+      "us": {
+        "traded_instrument": 1,
+        "cost": 100,
+        "index": "FTSE 100"
+      },
+      "europe": {
+        "traded_instrument": 1,
+        "cost": 100,
+        "index": "FTSE 100"
+      }
+    }
   },
 
   "commodities": {

@@ -16,15 +16,18 @@ Eventually the multi-asset portfolio will include:
 
 To begin with, we'll get the instruments we will use are ETFs or funds for equity and bonds, with some mix of geographies to build out the multi-level portfolio functionality of the framework.
 
-The general framework will be:
+The general framework will follow a hierarchy as below, with some variations depending on the asset class.
+For example, cryptocurrencies don't make sense to split by country.
 - Asset class
 -- Country
 --- Sector
 
-Initally this will be as follows. 
+Initially this will be as follows. 
 
 - Equity
 -- UK
+--- FTSE 100
+--- FTSE 250
 -- US
 -- Eurostoxx
 
@@ -32,13 +35,13 @@ Initally this will be as follows.
 -- US
 --- gov
 --- corporate
-
 --UK
 --- gov
 --- corporate
 
 Choose an instrument to get representative data on:
-- UK equity
+- UK equity FTSE 100
+- UK equity FTSE 250
 - US equity
 - Eurostoxx equity
 
@@ -177,46 +180,3 @@ If this is within 10% of the current position, make no change. This is position 
 If more than 10% away from target, trade to the target.
 
 
-## TODO
-### Data Sources
-- quandl
-- fix yahoo finance
-- eoddata?
-
-
-
-### Plan
-- Get data from yfinance 
-- Choose instruments
-- Create strategies to contain the parameterised versions of the signal that will be run.
-  Longer term there will be a framework to run each of these as metrics on some data fixtures.
-- Implement the Forecast class for a momentum strategy with 3 speeds
-- Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
-  later FundamentalData, MacroData etc will be consistent?
-- Implement InstrumentForecast class
-- Implement Portfolio class
-- Consider adding an Instrument class which for each instrument contains: 
-  long_name, asset_class, currency, p_weight?, market_data call and params
-- data_retrieval should handle periodic/daily retrieval of new data nd save to some database
-  (CSV file for now?). The signals should all read their data from this database. 
-- Get data from quandl
-- Bulk out technical indicators using ta-lib
-  
- ### Done
-- Refactor strategies as signals, which will have the raw signal functions.
-- Create framework folder to handle forecast scaling, diversification multipliers, weights etc.
-- Create a second strategy (mean reversion? open to close?) to implement in the InstrumentForecast
-  class. Created breakout signal.
-- Add tests for breakout
-
-
-## To Read:
-- Kelly Criterion
-- Perry Kaufman signals book
-- Leveraged trading
-
-
-## Future modules:
-- evaluation - maybe roll this into portfolio_management
-- execution - once trading is automated
-- risk
