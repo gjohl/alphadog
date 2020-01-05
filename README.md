@@ -28,27 +28,22 @@ Initially this will be as follows.
 -- UK
 --- FTSE 100
 --- FTSE 250
+--- FTSE All Shares
 -- US
 -- Eurostoxx
 
 - Bonds
--- US
---- gov
---- corporate
---UK
---- gov
---- corporate
+-- Gov
+--- UK
+--- US
+--- Europe
+-- Corporate
+--- UK
+--- Global
+-- Inflation-linked
 
-Choose an instrument to get representative data on:
-- UK equity FTSE 100
-- UK equity FTSE 250
-- US equity
-- Eurostoxx equity
-
-- US treasuries
-- US corporate bonds
-- UK gilts
-- UK corporate bonds
+- Real Estate
+-- Global
 
 
 The criteria for choosing an instrument are:

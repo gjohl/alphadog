@@ -7,7 +7,7 @@ import logging
 import pandas as pd
 import yfinance as yf
 
-from .constants import YFINANCE_REQUIRED_COLS, YFINANCE_SYMBOL_MAPPING, DATA_DIR
+from .constants import YFINANCE_REQUIRED_COLS, YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING, DATA_DIR
 
 
 def get_yfinance_data(symbol, **kwargs):
@@ -68,8 +68,8 @@ def backfill_yfinance_data(symbol):
     """
     logging.info(f"Backfilling symbol {symbol}")
 
-    if symbol in YFINANCE_SYMBOL_MAPPING:
-        filename = YFINANCE_SYMBOL_MAPPING[symbol]
+    if symbol in YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING:
+        filename = YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING[symbol]
     else:
         raise ValueError(f"Unknown symbol. {symbol} is not mapped.")
 
@@ -103,8 +103,8 @@ def update_yfinance_data(symbol):
     """
     logging.info(f"Backfilling symbol {symbol}")
 
-    if symbol in YFINANCE_SYMBOL_MAPPING:
-        filename = YFINANCE_SYMBOL_MAPPING[symbol]
+    if symbol in YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING:
+        filename = YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING[symbol]
     else:
         raise ValueError(f"Unknown symbol. {symbol} is not mapped.")
     file_dir = f"{DATA_DIR}{filename}.csv"
@@ -131,20 +131,20 @@ def update_yfinance_data(symbol):
     logging.info(f"Successfully wrote {symbol} data to {file_dir}")
 
 
-def load_yfinance_data(internal_symbol):
+def load_yfinance_data(instrument_id):
     """
     Load the saved yfiance data from the CSV file.
 
     Parameters
     ----------
-    internal_symbol: str
-        internal symbol for the desired security
+    instrument_id: str
+        internal instrument_id for the desired security.
 
     Returns
     -------
     df: pd.DataFrame
         DataFrame of data for the requested security.
     """
-    file_dir = f"{DATA_DIR}{internal_symbol}.csv"
+    file_dir = f"{DATA_DIR}{instrument_id}.csv"
     df = pd.read_csv(file_dir, index_col='timestamp')
     return df
