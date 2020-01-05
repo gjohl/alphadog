@@ -52,6 +52,12 @@ The criteria for choosing an instrument are:
 - Low trading costs. For now, as an MVP, this will be judged by the cost of trading in a
   Hargreaves Lansdowne account but later I'll make other broker accounts if it is worthwhile.
 
+### Adding a new instrument
+- Add the instrument and details to instruments_config.json
+- Add the yfinance_symbol: instrument_ID pair to YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING
+- Backfill the yfinance symbol
+
+
 
 ## Forecasts
 In units of risk-adjusted returns (Sharpe ratio).
