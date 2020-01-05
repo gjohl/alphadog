@@ -33,6 +33,7 @@ def get_yfinance_data(symbol, **kwargs):
     ticker = yf.Ticker(symbol)
     df = ticker.history(**kwargs)
     df.columns = [k.lower().replace(' ', '_') for k in df.columns]
+    df.index.name = 'timestamp'
 
     # Check expected columns
     for col in YFINANCE_REQUIRED_COLS:
@@ -69,7 +70,7 @@ def backfill_yfinance_data(symbol):
     else:
         raise ValueError(f"Unknown symbol. {symbol} is not mapped.")
 
-    file_dir = f"{DATA_DIR}{filename}"
+    file_dir = f"{DATA_DIR}{filename}.csv"
     df = get_yfinance_data(symbol, period='max')
     df.to_csv(file_dir)
 
@@ -103,7 +104,7 @@ def update_yfinance_data(symbol):
         filename = YFINANCE_SYMBOL_MAPPING[symbol]
     else:
         raise ValueError(f"Unknown symbol. {symbol} is not mapped.")
-    file_dir = f"{DATA_DIR}{filename}"
+    file_dir = f"{DATA_DIR}{filename}.csv"
 
     # Check the existing file
     old_df = pd.read_csv(file_dir)
@@ -113,13 +114,34 @@ def update_yfinance_data(symbol):
         return
 
     start_date = latest_date + pd.Timedelta(1, 'day')
-    df = get_yfinance_data(symbol, start=start_date.strftime("%Y-%m-%d"))
+    new_df = get_yfinance_data(symbol, start=start_date.strftime("%Y-%m-%d"))
 
-    if df.index[0].date() < start_date:
+    if new_df.index[0].date() < start_date:
         # Using a recent date that there is no data for returns the most recent day of data
         return
 
+    # Append the new data to the existing data
+    df = pd.concat([old_df, new_df])
     df = df.drop_duplicates()
     df.to_csv(file_dir)
 
     logging.info(f"Successfully wrote {symbol} data to {file_dir}")
+
+
+def load_yfinance_data(internal_symbol):
+    """
+    Load the saved yfiance data from the CSV file.
+
+    Parameters
+    ----------
+    internal_symbol: str
+        internal symbol for the desired security
+
+    Returns
+    -------
+    df: pd.DataFrame
+        DataFrame of data for the requested security.
+    """
+    file_dir = f"{DATA_DIR}{internal_symbol}.csv"
+    df = pd.read_csv(file_dir, index_col='timestamp')
+    return df

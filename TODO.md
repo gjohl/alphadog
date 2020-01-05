@@ -9,8 +9,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-
-- Get data from yfinance 
 - Create strategies to contain the parameterised versions of the signal that will be run.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
 - Implement the Forecast class for a momentum strategy with 3 speeds
@@ -36,6 +34,7 @@ Keep track of ongoing work and priorities.
 - Add tests for breakout
 - Choose instruments
 - Create instruments_config.json
+- Get data from yfinance 
 
 
 
