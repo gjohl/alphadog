@@ -1,1 +1,1 @@
-from .yfinance_data import load_yfinance_data
+from .yfinance_data import load_yfinance_data  # noqa

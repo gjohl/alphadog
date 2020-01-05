@@ -1,5 +1,3 @@
-import pandas as pd
-
 from ..framework.constants import AVG_FORECAST
 
 

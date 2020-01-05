@@ -1,6 +1,4 @@
-import numpy as np
 import pandas as pd
-import pytest
 
 from alphadog.signals.bias import long_bias_signal, short_bias_signal
 
