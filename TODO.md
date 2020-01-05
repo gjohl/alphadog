@@ -9,7 +9,7 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Create instruments_config.json
+
 - Get data from yfinance 
 - Create strategies to contain the parameterised versions of the signal that will be run.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
@@ -26,13 +26,16 @@ Keep track of ongoing work and priorities.
 - Get data from quandl
 - Bulk out technical indicators using ta-lib
   
+  
 ## Done
+- Create first strategy - simple ewma momentum
 - Refactor strategies as signals, which will have the raw signal functions.
 - Create framework folder to handle forecast scaling, diversification multipliers, weights etc.
 - Create a second strategy (mean reversion? open to close?) to implement in the InstrumentForecast
   class. Created breakout signal.
 - Add tests for breakout
 - Choose instruments
+- Create instruments_config.json
 
 
 
