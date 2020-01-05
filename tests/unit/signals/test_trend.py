@@ -54,9 +54,29 @@ class TestMomentumSignal:
         pd.testing.assert_frame_equal(actual, expected)
 
     @pytest.mark.parametrize('fast, slow', [[2, 6]])
-    def test_intermittent_nans(self, mock_price, fast, slow):
-        # TODO
-        pass
+    def test_intermittent_nans(self, mock_ohlcv, fast, slow):
+        """Test that nans are handled correctly."""
+        df = mock_ohlcv.copy()
+        df.iloc[10:15] = np.nan
+        actual = momentum_signal(df, fast, slow)
+
+        expected_col = pd.DataFrame({'price': [
+            np.nan, 0.2357022603955226, 0.39887749788506854, 0.5095484986130991,
+            0.5803325379213695, 0.622939407912391, 0.6467732559957836, 0.6585909726500113,
+            0.6629562994523351, 0.6628557502902326, np.nan, np.nan,
+            np.nan, np.nan, np.nan, 0.45006020896312,
+            0.36647431110068285, 0.36578642627155605, 0.4046491217537645, 0.458527608467524]},
+            index=pd.DatetimeIndex(['2019-01-01', '2019-01-02', '2019-01-03', '2019-01-04',
+                                    '2019-01-07', '2019-01-08', '2019-01-09', '2019-01-10',
+                                    '2019-01-11', '2019-01-14', '2019-01-15', '2019-01-16',
+                                    '2019-01-17', '2019-01-18', '2019-01-21', '2019-01-22',
+                                    '2019-01-23', '2019-01-24', '2019-01-25', '2019-01-28'],
+                                   dtype='datetime64[ns]', name='timestamp', freq='B'))
+        expected_list = [expected_col] * 5
+        expected = pd.concat(expected_list, axis=1)
+        expected.columns = ['open', 'high', 'low', 'close', 'volume']
+
+        pd.testing.assert_frame_equal(actual, expected)
 
     @pytest.mark.parametrize('fast, slow', [[2, 6]])
     def test_empty_df(self, fast, slow):
@@ -90,9 +110,25 @@ class TestBreakoutSignal:
         expected.columns = ['open', 'high', 'low', 'close', 'volume']
         pd.testing.assert_frame_equal(actual, expected)
 
-    def test_intermittent_nans(self):
-        # TODO
-        pass
+    def test_intermittent_nans(self, mock_ohlcv):
+        """Test that nans are handled correctly."""
+        df = mock_ohlcv.copy()
+        df.iloc[10:15] = np.nan
+        actual = breakout_signal(df, lookback_period=4)
+
+        expected_col = pd.DataFrame(
+            {'price': [np.nan] + [20.] * 9 + [np.nan] * 5 + [20.] * 5},
+            index=pd.DatetimeIndex(['2019-01-01', '2019-01-02', '2019-01-03', '2019-01-04',
+                                    '2019-01-07', '2019-01-08', '2019-01-09', '2019-01-10',
+                                    '2019-01-11', '2019-01-14', '2019-01-15', '2019-01-16',
+                                    '2019-01-17', '2019-01-18', '2019-01-21', '2019-01-22',
+                                    '2019-01-23', '2019-01-24', '2019-01-25', '2019-01-28'],
+                                   dtype='datetime64[ns]', name='timestamp', freq='B'))
+        expected_list = [expected_col] * 5
+        expected = pd.concat(expected_list, axis=1)
+        expected.columns = ['open', 'high', 'low', 'close', 'volume']
+
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_empty_df(self):
         """Test that an empty input returns an empty output."""

@@ -1,3 +1,6 @@
+"""
+Functionality to handle yahoo finance data.
+"""
 from datetime import datetime
 import logging
 

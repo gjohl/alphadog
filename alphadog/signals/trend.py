@@ -20,7 +20,7 @@ def momentum_signal(df, fast, slow):
 
     Returns
     -------
-    pd.DataFrame
+    momentum_df: pd.DataFrame
         Columnwise momentum signal run over the input DataFrame.
         Returns the same columns as the input.
 
@@ -35,7 +35,12 @@ def momentum_signal(df, fast, slow):
     fast_ewma = df.ewm(span=fast).mean()
     slow_ewma = df.ewm(span=slow).mean()
     ewvol = df.ewm(span=slow).std()
-    return (fast_ewma - slow_ewma) / ewvol
+
+    # Reinstate NaNs where they were in the input DataFrame
+    momentum_df = (fast_ewma - slow_ewma) / ewvol
+    momentum_df[df.isna()] = np.nan
+
+    return momentum_df
 
 
 def breakout_signal(df, lookback_period, smooth_period=None):
@@ -110,5 +115,7 @@ def breakout_signal(df, lookback_period, smooth_period=None):
     smoothed_breakout = (scaled_breakout
                          .ewm(span=smooth_period, min_periods=min_smooth_periods)
                          .mean())
+    # Reinstate NaNs where they were in the input DataFrame
+    smoothed_breakout[df.isna()] = np.nan
 
     return smoothed_breakout
