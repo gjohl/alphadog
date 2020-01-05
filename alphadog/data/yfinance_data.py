@@ -3,11 +3,18 @@ Functionality to handle yahoo finance data.
 """
 from datetime import datetime
 import logging
+import os
 
 import pandas as pd
 import yfinance as yf
 
-from .constants import YFINANCE_REQUIRED_COLS, YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING, DATA_DIR
+from alphadog.data.constants import (
+    DATA_DIR, YFINANCE_DIR,
+    YFINANCE_REQUIRED_COLS, YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING
+)
+
+
+YFINANCE_PATH = os.path.join(DATA_DIR, YFINANCE_DIR)
 
 
 def get_yfinance_data(symbol, **kwargs):
@@ -73,7 +80,7 @@ def backfill_yfinance_data(symbol):
     else:
         raise ValueError(f"Unknown symbol. {symbol} is not mapped.")
 
-    file_dir = f"{DATA_DIR}{filename}.csv"
+    file_dir = os.path.join(YFINANCE_PATH, filename + '.csv')
     df = get_yfinance_data(symbol, period='max')
     df.to_csv(file_dir)
 
@@ -107,7 +114,7 @@ def update_yfinance_data(symbol):
         filename = YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING[symbol]
     else:
         raise ValueError(f"Unknown symbol. {symbol} is not mapped.")
-    file_dir = f"{DATA_DIR}{filename}.csv"
+    file_dir = os.path.join(YFINANCE_PATH, filename + '.csv')
 
     # Check the existing file
     old_df = pd.read_csv(file_dir)
@@ -145,6 +152,6 @@ def load_yfinance_data(instrument_id):
     df: pd.DataFrame
         DataFrame of data for the requested security.
     """
-    file_dir = f"{DATA_DIR}{instrument_id}.csv"
+    file_dir = os.path.join(YFINANCE_PATH, instrument_id + '.csv')
     df = pd.read_csv(file_dir, index_col='timestamp')
     return df
