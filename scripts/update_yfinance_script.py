@@ -1,7 +1,11 @@
+import click
+
 from alphadog.data.yfinance_data import update_yfinance_data
 from alphadog.data.constants import YFINANCE_SYMBOLS
 
 
+@click.command()
+@click.option("--symbol", default=YFINANCE_SYMBOLS, help="Symbols to update.")
 def run(symbols=YFINANCE_SYMBOLS):
     for symbol in symbols:
         update_yfinance_data(symbol)

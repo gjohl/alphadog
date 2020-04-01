@@ -1,3 +1,4 @@
+click
 cufflinks
 lxml
 numpy

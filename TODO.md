@@ -5,10 +5,13 @@ Keep track of ongoing work and priorities.
 ## Data Sources
 - yfinance
 - quandl
+- FINRA
 - eoddata?
 
 
 ## Plan
+- Create signals_config.json - for each strategy specify the parameters it will run with, the forecast scalar
+- Create a flat config for and then import this into a hierarchy instead of directly specifying both? 
 - Implement the Forecast class for a momentum strategy with 3 speeds
 - Implement InstrumentForecast class
 - Implement Portfolio class
@@ -16,10 +19,10 @@ Keep track of ongoing work and priorities.
   long_name, asset_class, currency, p_weight?, market_data call and params
 - Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
   later FundamentalData, MacroData etc will be consistent?
-- Get data for FINRA short volume - see email
 - Add tests for yfinance data scripts?
 - Bulk out technical indicators using ta-lib
 - Get data from quandl
+- Backfill FINRA data to 2010
   
   
 ## Done
@@ -38,6 +41,7 @@ Keep track of ongoing work and priorities.
 - WON'T DO. Create strategies to contain the parameterised versions of the signal that will be run.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
 - Add intermittent nans test to trend signals
+- Write parser for FINRA short volume - see email
 
 
 

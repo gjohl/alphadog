@@ -1,0 +1,3 @@
+Date|Symbol|ShortVolume|ShortExemptVolume|TotalVolume|Market
+20190301|AMZN|114|0|122|B
+1

@@ -78,7 +78,7 @@ Rate a security on this +-20 scale.
 
 
 ## Combined forecasts
-Handcraft weights (or bootstrap based on historical covariances and expected returns.
+Handcraft weights (or bootstrap based on historical covariances and expected returns.)
 
 Level 1 - split by trading rule, e.g. ewmac vs carry
 Level 2 - split by variations, e.g momentum speeds. Consider correlations, middle speed is the
@@ -110,7 +110,7 @@ If the portfolio has £100k and 30% vol taget, cash vol is £30k. If the portfol
 the cash vol target should be adjusted to £90k * 30% = £27k. This is "rolling up profits and
 losses".
 
-pct_vol_target_annualised = annualised expected vol
+vol_target_pct_annualised = annualised expected vol
 trading_capital = £ available to invest
 cash_vol_target_annualised = vol_target_pct * trading_capital
 cash_vol_target_daily = cash_vol_annualised / sqrt(252)

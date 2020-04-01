@@ -140,7 +140,7 @@ def update_yfinance_data(symbol):
 
 def load_yfinance_data(instrument_id):
     """
-    Load the saved yfiance data from the CSV file.
+    Load the saved yfinance data from the CSV file.
 
     Parameters
     ----------

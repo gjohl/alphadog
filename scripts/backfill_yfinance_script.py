@@ -1,7 +1,11 @@
+import click
+
 from alphadog.data.yfinance_data import backfill_yfinance_data
 from alphadog.data.constants import YFINANCE_SYMBOLS
 
 
+@click.command()
+@click.option("--symbol", default=YFINANCE_SYMBOLS, help="Symbols to backfill.")
 def run(symbols=YFINANCE_SYMBOLS):
     for symbol in symbols:
         backfill_yfinance_data(symbol)
@@ -9,5 +13,5 @@ def run(symbols=YFINANCE_SYMBOLS):
 
 
 if __name__ == "__main__":
-    # TODO: use argparse to pass arguments and run this as from the command line
+
     run()
