@@ -10,18 +10,16 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
+- Flesh out portfolio framework and implement missing functionality
+- Add tests for portfolio_framework.py
 - Create signals_config.json - for each strategy specify the parameters it will run with, the forecast scalar
-- Create a flat config for and then import this into a hierarchy instead of directly specifying both? 
-- Implement the Forecast class for a momentum strategy with 3 speeds
-- Implement InstrumentForecast class
-- Implement Portfolio class
+- Get data from quandl
 - Consider adding an Instrument class which for each instrument contains: 
   long_name, asset_class, currency, p_weight?, market_data call and params
 - Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
   later FundamentalData, MacroData etc will be consistent?
 - Add tests for yfinance data scripts?
 - Bulk out technical indicators using ta-lib
-- Get data from quandl
 - Backfill FINRA data to 2010
   
   
@@ -42,6 +40,10 @@ Keep track of ongoing work and priorities.
   Longer term there will be a framework to run each of these as metrics on some data fixtures.
 - Add intermittent nans test to trend signals
 - Write parser for FINRA short volume - see email
+- Create a flat config for and then import this into a hierarchy instead of directly specifying both 
+- Outline the Forecast class
+- Outline InstrumentForecast class
+- Outline Portfolio class
 
 
 

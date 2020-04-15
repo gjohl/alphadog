@@ -53,7 +53,8 @@ The criteria for choosing an instrument are:
   Hargreaves Lansdowne account but later I'll make other broker accounts if it is worthwhile.
 
 ### Adding a new instrument
-- Add the instrument and details to instruments_config.json
+- Add the instrument and details to instrument_config.json
+- Add the instrument to instrument_hierarchy.json
 - Add the yfinance_symbol: instrument_ID pair to YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING
 - Backfill the yfinance symbol
 
@@ -106,7 +107,7 @@ Start with constant vol target and low capital, and slowly increase the capital 
 gains confidence.
 
 Percentage vol target is constant. Cash volatility target varies depending on performance.
-If the portfolio has £100k and 30% vol taget, cash vol is £30k. If the portfolio drops 10%,
+If the portfolio has £100k and 30% vol target, cash vol is £30k. If the portfolio drops 10%,
 the cash vol target should be adjusted to £90k * 30% = £27k. This is "rolling up profits and
 losses".
 
