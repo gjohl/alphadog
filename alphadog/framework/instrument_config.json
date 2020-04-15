@@ -1,0 +1,136 @@
+{
+  "FTSE100": {
+    "traded_instrument": "LEGAL & GENERAL UK 100 INDEX TRUST",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/l/legal-and-general-uk-100-index-class-c-accumulation",
+    "cost": 6,
+    "index": "FTSE 100",
+    "instrument_id": "FTSE100",
+    "yfinance_symbol": "^FTSE",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EFTSE?p=^FTSE",
+    "currency": "GBP",
+    "is_traded": true
+  },
+  "FTSE250": {
+    "traded_instrument": "HSBC FTSE 250 INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hsbc-ftse-250-index-class-s-accumulation",
+    "cost": 8,
+    "index": "FTSE 250",
+    "instrument_id": "FTSE250",
+    "yfinance_traded_symbol": "0P0000WN7D.L",
+    "yfinance_traded_link": "https://uk.finance.yahoo.com/quote/0P0000WN7D.L?p=0P0000WN7D.L",
+    "yfinance_symbol": "^FTMC",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EFTMC?p=^FTMC",
+    "currency": "GBP",
+    "is_traded": true
+  },
+  "FTSEAS": {
+    "traded_instrument": "LEGAL & GENERAL UK INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/l/legal-and-general-uk-index-class-c-accumulation",
+    "cost": 4,
+    "index": "FTSE All Share",
+    "instrument_id": "FTSEAS",
+    "yfinance_symbol": "^FTAS",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EFTAS?p=^FTAS",
+    "currency": "GBP",
+    "is_traded": true
+  },
+  "SP500": {
+    "traded_instrument": "FIDELITY INDEX US",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/f/fidelity-index-us-class-p-accumulation",
+    "cost": 6,
+    "index": "S&P 500",
+    "instrument_id": "SP500",
+    "yfinance_symbol": "^GSPC",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EGSPC?p=^GSPC",
+    "currency": "USD",
+    "is_traded": true
+  },
+  "FTSEEURO": {
+    "traded_instrument": "ISHARES CONTINENTAL EUROPEAN EQUITY INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/i/ishares-continental-euro-equity-index-h-accumulation",
+    "cost": 6,
+    "index": "FTSE World Europe ex UK Index",
+    "instrument_id": "FTSEEURO",
+    "yfinance_symbol": "AWNT05UK.L",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/AWNT05UK.L?p=AWNT05UK.L",
+    "currency": "GBP",
+    "is_traded": true
+  },
+  "UKGOV": {
+    "traded_instrument": "LEGAL & GENERAL ALL STOCKS GILT INDEX TRUST",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/l/legal-and-general-all-stocks-gilt-index-trust-c-accumulation",
+    "cost": 10,
+    "index": "Vanguard UK Gilt ETF",
+    "instrument_id": "UKGOV",
+    "yfinance_symbol": "VGOV.L",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/VGOV.L?p=VGOV.L",
+    "currency": "GBP",
+    "is_traded": true
+  },
+  "USGOV": {
+    "traded_instrument": "VANGUARD US GOVERNMENT BOND INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/v/vanguard-us-government-bond-index-accumulation",
+    "cost": 12,
+    "index": "Barclays Capital Global Aggregate U.S. Government Bond Index",
+    "instrument_id": "USGOV",
+    "yfinance_symbol": "IE00BFRTDB69.IR",
+    "yfinance_link": "https://finance.yahoo.com/quote/IE00BFRTDB69.IR?p=IE00BFRTDB69.IR",
+    "currency": "GBX",
+    "is_traded": true
+  },
+  "EUROGOV": {
+    "traded_instrument": "VANGUARD EURO GOVERNMENT BOND INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/v/vanguard-euro-government-bond-index-accumulation",
+    "cost": 12,
+    "index": "Bloomberg Barclays Euro Government Float Adjusted Bond Index",
+    "instrument_id": "EUROGOV",
+    "yfinance_symbol": "GOVY.L",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/GOVY.L?p=GOVY.L",
+    "currency": "EUR",
+    "is_traded": true
+  },
+  "UKCORP": {
+    "traded_instrument": "VANGUARD UK INVESTMENT GRADE BOND INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/v/vanguard-uk-investment-grade-bond-index-accumulation",
+    "cost": 12,
+    "index": "Vanguard U.K. Investment Grade Bond Index Fund GBP Income",
+    "instrument_id": "UKCORP",
+    "yfinance_symbol": "IE00B1S74W91.IR",
+    "yfinance_link": "https://finance.yahoo.com/quote/IE00B1S74W91.IR",
+    "currency": "GBX",
+    "is_traded": false
+  },
+  "GLOBALCORP": {
+    "traded_instrument": "ISHARES OVERSEAS CORPORATE BOND INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/i/ishares-overseas-corporate-bond-index-h-accumulation",
+    "cost": 11,
+    "index": "iShares iBoxx $ Investment Grade Corporate Bond ETF",
+    "symbol": "GLOBALCORP",
+    "yfinance_symbol": "LQD",
+    "yfinance_link": "https://finance.yahoo.com/quote/lqd",
+    "currency": "USD",
+    "is_traded": true
+  },
+  "UKILB": {
+    "traded_instrument": "VANGUARD UK INFLATION LINKED GILT INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/v/vanguard-uk-inflation-linked-gilt-index-accumulation",
+    "cost": 12,
+    "index": "iShares £ Index-Lnkd Gilts ETF GBP Dist",
+    "instrument_id": "UKILB",
+    "yfinance_symbol": "INXG.L",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/INXG.L",
+    "currency": "GBP",
+    "is_traded": true
+  },
+  "GLOBALREIT": {
+    "traded_instrument": "ISHARES GLOBAL PROPERTY SECS. EQ. INDEX",
+    "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/i/ishares-glbl-propty-secs.-eq.-index-class-h-accumulation",
+    "cost": 20,
+    "index": "First Trust FTSE EN Dev Mkts Rel Est ETF",
+    "instrument_id": "GLOBALREIT",
+    "yfinance_symbol": "FFR",
+    "yfinance_link": "https://uk.finance.yahoo.com/quote/FFR?p=FFR",
+    "currency": "USD",
+    "is_traded": true
+  }
+}

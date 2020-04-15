@@ -89,5 +89,7 @@ def load_finra_data(date, exchange='CNMS'):
     filepath = f"{DATA_DIR}{FINRA_DIR}{exchange}/{filename}"
 
     df = pd.read_csv(filepath, sep='|')
+    df = df.dropna(subset=['Symbol'])
+    df.loc[:, 'Date'] = pd.to_datetime(df['Date'], format="%Y%m%d").dt.date
 
     return df
