@@ -13,5 +13,4 @@ def run(symbols=YFINANCE_SYMBOLS):
 
 
 if __name__ == "__main__":
-
     run()

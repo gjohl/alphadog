@@ -8,7 +8,10 @@
     "yfinance_symbol": "^FTSE",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EFTSE?p=^FTSE",
     "currency": "GBP",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "equity",
+    "hierarchy_2": "uk",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "FTSE250": {
     "traded_instrument": "HSBC FTSE 250 INDEX",
@@ -21,7 +24,10 @@
     "yfinance_symbol": "^FTMC",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EFTMC?p=^FTMC",
     "currency": "GBP",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "equity",
+    "hierarchy_2": "uk",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "FTSEAS": {
     "traded_instrument": "LEGAL & GENERAL UK INDEX",
@@ -32,7 +38,10 @@
     "yfinance_symbol": "^FTAS",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EFTAS?p=^FTAS",
     "currency": "GBP",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "equity",
+    "hierarchy_2": "uk",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "SP500": {
     "traded_instrument": "FIDELITY INDEX US",
@@ -43,7 +52,10 @@
     "yfinance_symbol": "^GSPC",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/%5EGSPC?p=^GSPC",
     "currency": "USD",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "equity",
+    "hierarchy_2": "us",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "FTSEEURO": {
     "traded_instrument": "ISHARES CONTINENTAL EUROPEAN EQUITY INDEX",
@@ -54,7 +66,10 @@
     "yfinance_symbol": "AWNT05UK.L",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/AWNT05UK.L?p=AWNT05UK.L",
     "currency": "GBP",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "equity",
+    "hierarchy_2": "europe",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "UKGOV": {
     "traded_instrument": "LEGAL & GENERAL ALL STOCKS GILT INDEX TRUST",
@@ -65,7 +80,11 @@
     "yfinance_symbol": "VGOV.L",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/VGOV.L?p=VGOV.L",
     "currency": "GBP",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "bond",
+    "hierarchy_2": "government",
+    "hierarchy_3": "uk",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "USGOV": {
     "traded_instrument": "VANGUARD US GOVERNMENT BOND INDEX",
@@ -76,7 +95,11 @@
     "yfinance_symbol": "IE00BFRTDB69.IR",
     "yfinance_link": "https://finance.yahoo.com/quote/IE00BFRTDB69.IR?p=IE00BFRTDB69.IR",
     "currency": "GBX",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "bond",
+    "hierarchy_2": "government",
+    "hierarchy_3": "us",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "EUROGOV": {
     "traded_instrument": "VANGUARD EURO GOVERNMENT BOND INDEX",
@@ -87,7 +110,11 @@
     "yfinance_symbol": "GOVY.L",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/GOVY.L?p=GOVY.L",
     "currency": "EUR",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "bond",
+    "hierarchy_2": "government",
+    "hierarchy_3": "europe",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "UKCORP": {
     "traded_instrument": "VANGUARD UK INVESTMENT GRADE BOND INDEX",
@@ -98,7 +125,11 @@
     "yfinance_symbol": "IE00B1S74W91.IR",
     "yfinance_link": "https://finance.yahoo.com/quote/IE00B1S74W91.IR",
     "currency": "GBX",
-    "is_traded": false
+    "is_traded": false,
+    "hierarchy_1": "bond",
+    "hierarchy_2": "corporate",
+    "hierarchy_3": "uk",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "GLOBALCORP": {
     "traded_instrument": "ISHARES OVERSEAS CORPORATE BOND INDEX",
@@ -109,7 +140,11 @@
     "yfinance_symbol": "LQD",
     "yfinance_link": "https://finance.yahoo.com/quote/lqd",
     "currency": "USD",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "bond",
+    "hierarchy_2": "corporate",
+    "hierarchy_3": "global",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "UKILB": {
     "traded_instrument": "VANGUARD UK INFLATION LINKED GILT INDEX",
@@ -120,7 +155,11 @@
     "yfinance_symbol": "INXG.L",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/INXG.L",
     "currency": "GBP",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "bond",
+    "hierarchy_2": "inflation",
+    "hierarchy_3": "uk",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   },
   "GLOBALREIT": {
     "traded_instrument": "ISHARES GLOBAL PROPERTY SECS. EQ. INDEX",
@@ -131,6 +170,9 @@
     "yfinance_symbol": "FFR",
     "yfinance_link": "https://uk.finance.yahoo.com/quote/FFR?p=FFR",
     "currency": "USD",
-    "is_traded": true
+    "is_traded": true,
+    "hierarchy_1": "real_estate",
+    "hierarchy_2": "global",
+    "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
   }
 }

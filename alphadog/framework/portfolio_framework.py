@@ -3,10 +3,14 @@ Systematic framework.
 
 Largely follows the methodology in Systematic Trading, Robert Carver.
 """
+import json
+import os
+
 import numpy as np
 import pandas as pd
 
-from .constants import (
+from alphadog.constants import PROJECT_DIR
+from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET
 )
@@ -26,15 +30,20 @@ class Portfolio:
     Take in a config yaml file of
     {'instrument_1': {'strategy_a': params, 'strategy_b': params}
     """
-    def __init__(self, instrument_forecasts, vol_target=VOL_TARGET):
+    def __init__(self, instrument_config=None, vol_target=VOL_TARGET):
         """
         Combine instrument forecasts into a portfolio position for each instrument
 
         Parameters
         ----------
-        instrument_forecasts: list(InstrumentForecast)
+        instrument_config: dict, optional
+            Nested dict which specifies details of every instrument to run in the portfolio.
+            If not supplied, defaults to the json config in the framework directory.
+        vol_target: float
+            The target annualised percentage volatility.
+            If not supplied, defaults to the constant specified in the framework directory.
         """
-        self.instrument_forecasts = instrument_forecasts
+        self.instrument_config = instrument_config or load_default_instrument_config()
         self.vol_target = vol_target
 
         # Weight the instrument subsystems and scale to get target portfolio positions.
@@ -94,7 +103,6 @@ class InstrumentForecast:
         self.subsystem_position = self.vol_scalar * self.combined_forecasts / AVG_FORECAST
 
 
-
 class Forecast:
     """
     Calculate a single strategy on a particular Instrument.
@@ -138,6 +146,99 @@ class Forecast:
         self.forecast_scalar = AVG_FORECAST / self.raw_forecast.mean()
         self.scaled_forecast = self.raw_forecast * self.forecast_scalar
         self.capped_forecast = self.scaled_forecast.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
+
+
+#########
+# Utils #
+#########
+
+# Portfolio utils
+def load_default_instrument_config():
+    """
+    Returns the default instrument config as specified in the json config file.
+
+    Returns
+    -------
+    instrument_config: dict
+        Specifies details of every instrument to run in the portfolio.
+    """
+    config_path = os.path.join(PROJECT_DIR, "alphadog/framework/instrument_config.json")
+
+    with open(config_path) as config_file:
+        instrument_config = json.load(config_file)
+
+    return instrument_config
+
+
+def hierarchy_depth(instrument):
+    """
+    Return the number of levels an instrument has in its hierarchy.
+
+    Parameters
+    ----------
+    instrument: dict
+        A single instrument from the `instrument_config.json`
+
+    Returns
+    -------
+    depth: int
+        The number of instruments in the hierarchy
+
+    Examples
+    --------
+    >>> instrument_config = load_default_instrument_config()
+    >>> instrument = instrument_config['FTSE100']
+    >>> hierarchy_depth(instrument)
+    """
+    levels = [int(key.split('_')[-1]) for key in instrument.keys() if 'hierarchy' in key]
+    if not levels:
+        return 0
+
+    depth = max(levels)
+    if depth != len(levels):
+        raise ValueError(f"Instrument {instrument['instrument_id']}"
+                         f" has skipped a level in its hierarchy")
+
+    return depth
+
+
+def get_siblings(instrument_config, instrument_name):
+    """
+    Return a list of instruments at the same hierarchy level as this instrument.
+
+    Parameters
+    ----------
+    instrument_config: dict, optional
+        Nested dict which specifies details of every instrument to run in the portfolio.
+    instrument_name: str
+        A single instrument to get siblings for.
+
+    Returns
+    -------
+    list
+        Instrument names which are at the same hierarchy level as the given instrument.
+    """
+    # FIXME: this loops through everything. We could track which siblings we have already
+    #  found and skip these
+    target_instrument = instrument_config[instrument_name]
+    target_levels = [key for key in target_instrument.keys() if 'hierarchy' in key]
+    target_values = [target_instrument[level] for level in target_levels]
+
+    siblings = []
+    for instrument in instrument_config.keys():
+        instrument_levels = [key for key in instrument.keys() if 'hierarchy' in key]
+        instrument_values = [instrument[level] for level in instrument_levels]
+
+        if instrument_values == target_values:
+            siblings.append(instrument)
+
+    return siblings
+
+
+
+
+
+
 
 
 def get_fweights(forecast_list):

@@ -1,4 +1,9 @@
-DATA_DIR = "/home/gurp/workspace/alphadog/alphadog/data/csv_files/"
+import os
+
+from alphadog.constants import PROJECT_DIR
+
+
+DATA_DIR = os.path.join(PROJECT_DIR, "alphadog/data/csv_files/")
 
 # Yahoo Finance
 YFINANCE_DIR = "yfinance/"

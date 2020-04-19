@@ -23,9 +23,11 @@ coverage.xml
 # directories
 *.egg-info/
 docs
-.cache
-.pytest_cache
 .benchmarks
+.cache
+.idea
+.pytest_cache
+notebooks/.ipynb_checkpoints/
 
 # wheels
 *.whl
