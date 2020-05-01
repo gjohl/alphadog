@@ -1,7 +1,7 @@
 import numpy as np
 # import pandas as pd
 
-from ..helpers.exceptions import ParameterError
+from ..internals.exceptions import ParameterError
 from ..framework.constants import MAX_FORECAST, MIN_FORECAST
 
 

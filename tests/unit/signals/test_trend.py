@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from alphadog.signals.trend import momentum_signal, breakout_signal
-from alphadog.helpers.exceptions import ParameterError
+from alphadog.internals.exceptions import ParameterError
 
 
 @pytest.fixture

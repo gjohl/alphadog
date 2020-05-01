@@ -145,7 +145,7 @@ def load_yfinance_data(instrument_id):
     Parameters
     ----------
     instrument_id: str
-        internal instrument_id for the desired security.
+        Internal instrument_id for the desired security.
 
     Returns
     -------
@@ -154,4 +154,6 @@ def load_yfinance_data(instrument_id):
     """
     file_dir = os.path.join(YFINANCE_PATH, instrument_id + '.csv')
     df = pd.read_csv(file_dir, index_col='timestamp')
+    df.index = pd.to_datetime(df.index)
+
     return df

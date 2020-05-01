@@ -63,7 +63,6 @@ class Portfolio:
         # TODO: finish this class according to the readme
 
 
-
 class InstrumentForecast:
     """
     Contains all strategies (Forecast objects) and related parameters for a particular instrument.
@@ -148,11 +147,10 @@ class Forecast:
         self.capped_forecast = self.scaled_forecast.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
 
 
-#########
-# Utils #
-#########
+###################
+# Portfolio utils #
+###################
 
-# Portfolio utils
 def load_default_instrument_config():
     """
     Returns the default instrument config as specified in the json config file.
@@ -235,11 +233,9 @@ def get_siblings(instrument_config, instrument_name):
     return siblings
 
 
-
-
-
-
-
+##################
+# Forecast utils #
+##################
 
 def get_fweights(forecast_list):
     """
