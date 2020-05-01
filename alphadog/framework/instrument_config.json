@@ -136,7 +136,7 @@
     "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/i/ishares-overseas-corporate-bond-index-h-accumulation",
     "cost": 11,
     "index": "iShares iBoxx $ Investment Grade Corporate Bond ETF",
-    "symbol": "GLOBALCORP",
+    "instrument_id": "GLOBALCORP",
     "yfinance_symbol": "LQD",
     "yfinance_link": "https://finance.yahoo.com/quote/lqd",
     "currency": "USD",

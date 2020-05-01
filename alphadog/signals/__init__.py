@@ -17,6 +17,7 @@ The naming convention is starts the signal name with:
 from alphadog.signals.trend import momentum_signal, breakout_signal
 from alphadog.signals.bias import long_bias_signal, short_bias_signal
 
+# TODO: make this a class instead of a dict?
 PARAMETERISED_SIGNALS = {}
 
 # Momentum signals

@@ -37,7 +37,8 @@ class PriceData(BaseData):
     Class for OHLCV data.
     """
     def __init__(self, input_df, name=None):
-        super().__init__(input_df, name)
+        price_df = input_df[['close']]  # TODO: make constants & tidy
+        super().__init__(price_df, name)
         check_price_data(self.df, self.name)
 
     @classmethod
@@ -76,5 +77,5 @@ class PriceData(BaseData):
         :class:`PriceData`
             A PriceData object for the given instrument identifier.
         """
-        price_df = load_yfinance_data(instrument_id)
-        return cls(price_df, instrument_id)
+        input_df = load_yfinance_data(instrument_id)
+        return cls(input_df, instrument_id)

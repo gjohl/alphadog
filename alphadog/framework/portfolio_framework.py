@@ -10,20 +10,22 @@ import numpy as np
 import pandas as pd
 
 from alphadog.constants import PROJECT_DIR
+from alphadog.data.retrieval import PriceData
 from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET
 )
+from alphadog.signals import PARAMETERISED_SIGNALS
 
 
 class Portfolio:
     """
-    Contains InstrumentForecast objects for every instrument traded in the portfolio.
+    Contains Subsystem objects for every instrument traded in the portfolio.
 
     Also calculate portfolio level statistics:
     - Portfolio returns
     - Correlations
-    - p_weights and diversification multiplier - pass these down to Instrument objects.
+    - p_weights and diversification multiplier - pass these down to Subsystem objects.
     - target_position
     - Required trades
 
@@ -43,27 +45,55 @@ class Portfolio:
             The target annualised percentage volatility.
             If not supplied, defaults to the constant specified in the framework directory.
         """
+        # TODO - handle the instrument's position in the hierarchy
         self.instrument_config = instrument_config or load_default_instrument_config()
         self.vol_target = vol_target
 
+    def run_subsystems(self):
+        """
+        Run all subsystems supplied for the Instrument.
+
+        Returns
+        -------
+        Sets forecast_list and capped_forecasts
+        """
+        instrument_ids = list(self.instrument_config.keys())
+        subsystem_list = []
+        for instrument_id in instrument_ids:
+            try:
+                instrument_dict = self.instrument_config[instrument_id]
+                subsystem = Subsystem(instrument_dict)
+                subsystem_list.append(subsystem)
+            except:
+                print(f"Failed on {instrument_id}")
+        self.subsystem_list = subsystem_list
+
+    def combine_subsystems(self):
+        """
+        Combine subsystems into a single target position for the Instrument.
+
+        Returns
+        -------
+        """
+
         # Weight the instrument subsystems and scale to get target portfolio positions.
-        diversification_multipliers = [get_diversification_multiplier(subsystem, self.vol_target)
-                                       for subsystem in self.instrument_forecasts]
-
-        self.pweights = get_pweights(self.instrument_forecasts)
+        diversification_multipliers = [
+            get_diversification_multiplier(subsystem.subsystem_position, self.vol_target)
+            for subsystem in self.subsystem_list
+        ]
         self.diversification_multipliers = diversification_multipliers
+        self.pweights = get_pweights(self.subsystem_list)
 
-        instrument_positions = [
-            subsystem * weight * div_mult for subsystem, weight, div_mult
-            in zip(self.instrument_forecasts, self.pweights, self.diversification_multipliers)
+        # TODO: account for missing data, varying pweights
+        weighted_subsystems = [
+            subsystem.subsystem_position * weight * div_mult for subsystem, weight, div_mult
+            in zip(self.subsystem_list, self.pweights, self.diversification_multipliers)
         ]
 
-        self.historical_instrument_positions = pd.concat(instrument_positions, axis=1)
-
-        # TODO: finish this class according to the readme
+        self.target_position = pd.concat(weighted_subsystems, axis=1).sum(axis=1)
 
 
-class InstrumentForecast:
+class Subsystem:
     """
     Contains all strategies (Forecast objects) and related parameters for a particular instrument.
 
@@ -81,21 +111,61 @@ class InstrumentForecast:
     - instrument_position (scale and cap subsystem)
     - target_position (round)
     """
-    def __init__(self, forecast_list, vol_target=VOL_TARGET):
+    def __init__(self, instrument_dict, vol_target=VOL_TARGET):
         """
-        Initialise the InstrumentForecast with the supplied forecasts for the instrument
+        Initialise the Subsystem with the supplied forecasts for the instrument
 
         Parameters
         ----------
-        forecast_list: list(Forecast)
-            The Forecast signals to run on an instrument.
+        instrument_dict: dict
+            A single instrument from the `instrument_config.json`
+        vol_target: float
+            The target annualised percentage volatility.
         """
-        self.forecast_list = forecast_list
+        self.instrument_id = instrument_dict['instrument_id']
+        self.is_traded = instrument_dict['is_traded']
+        self.currency = instrument_dict['currency']
+        self.signals = instrument_dict['signals'] if self.is_traded else []
         self.vol_target = vol_target
+        self.price_data = PriceData.from_instrument_id(self.instrument_id)
 
+        # TODO - handle the signal's position in the hierarchy
+        self.run_forecasts()
+        self.combine_forecasts()
+
+    def run_forecasts(self):
+        """
+        Run all forecasts supplied for the Instrument.
+
+        Returns
+        -------
+        Sets forecast_list and capped_forecasts
+        """
+
+        forecast_list = []
+        for signal_name in self.signals:
+            signal_func = PARAMETERISED_SIGNALS[signal_name]
+            input_df = self.price_data.df  # TODO handle passing different data objects to different signals
+            forecast = Forecast(signal_func,
+                                {'df': input_df},
+                                self.instrument_id,
+                                f"{self.instrument_id}|{signal_name}")
+            forecast_list.append(forecast)
+
+        self.forecast_list = forecast_list
+        self.capped_forecasts = [fc.capped_forecast for fc in forecast_list]
+
+    def combine_forecasts(self):
+        """
+        Combine all signals in the subsystem and scale
+
+        Returns
+        -------
+
+        """
         # Combine signals
-        self.fweights = get_fweights(self.forecast_list)
-        self.combined_forecasts = combine_signals(self.forecast_list, self.fweights, self.vol_target)  # noqa
+        self.fweights = get_fweights(self.capped_forecasts)
+        self.combined_forecasts = combine_signals(self.capped_forecasts, self.fweights, self.vol_target)  # noqa
 
         # Calc subsystem position
         self.vol_scalar = get_vol_scalar()  # TODO: implement this
@@ -130,7 +200,6 @@ class Forecast:
         self.params = params
         self.instrument_id = instrument_id
         self.name = name
-
         self.run_signal()
 
     def run_signal(self):
@@ -142,9 +211,10 @@ class Forecast:
         Sets the raw, scaled and capped forecast attributes
         """
         self.raw_forecast = self.signal_func(**self.params)
-        self.forecast_scalar = AVG_FORECAST / self.raw_forecast.mean()
+        self.forecast_scalar = AVG_FORECAST / self.raw_forecast.abs().mean()
         self.scaled_forecast = self.raw_forecast * self.forecast_scalar
         self.capped_forecast = self.scaled_forecast.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
+        # TODO: combine signals if multicolumn
 
 
 ###################
@@ -168,13 +238,13 @@ def load_default_instrument_config():
     return instrument_config
 
 
-def hierarchy_depth(instrument):
+def hierarchy_depth(instrument_dict):
     """
     Return the number of levels an instrument has in its hierarchy.
 
     Parameters
     ----------
-    instrument: dict
+    instrument_dict: dict
         A single instrument from the `instrument_config.json`
 
     Returns
@@ -185,16 +255,16 @@ def hierarchy_depth(instrument):
     Examples
     --------
     >>> instrument_config = load_default_instrument_config()
-    >>> instrument = instrument_config['FTSE100']
-    >>> hierarchy_depth(instrument)
+    >>> instrument_dict = instrument_config['FTSE100']
+    >>> hierarchy_depth(instrument_dict)
     """
-    levels = [int(key.split('_')[-1]) for key in instrument.keys() if 'hierarchy' in key]
+    levels = [int(key.split('_')[-1]) for key in instrument_dict.keys() if 'hierarchy' in key]
     if not levels:
         return 0
 
     depth = max(levels)
     if depth != len(levels):
-        raise ValueError(f"Instrument {instrument['instrument_id']}"
+        raise ValueError(f"Instrument {instrument_dict['instrument_id']}"
                          f" has skipped a level in its hierarchy")
 
     return depth
@@ -266,13 +336,13 @@ def get_pweights(subsystem_list):
 
     Parameters
     ----------
-    subsystem_list: list(InstrumentForecast)
-        The instrument forecasts to include in a portfolio.
+    subsystem_list: list(Subsysytem)
+        The subsystems to include in a portfolio.
 
     Returns
     -------
     pweights: list(float)
-        The fraction of the portfolio to allocate to each InstrumentForecast subsystem in the list.
+        The fraction of the portfolio to allocate to each Subsystem in the list.
     """
     # TODO: As a first pass this just assigns equal weights. Calculate this correctly.
     #   It may make sense to combine the logic for fweights and pweights into a single function
@@ -300,7 +370,7 @@ def get_diversification_multiplier(signal_df, target_vol):
     #  Perhaps we may want to try a rolling window and/or ewmvol?
     assert target_vol > 0
 
-    signal_vol = signal_df.std()
+    signal_vol = signal_df.std().values[0]
     div_multiplier = min(target_vol / signal_vol, MAX_DIVERSIFICATION_MULTIPLIER)
 
     return div_multiplier
@@ -313,7 +383,7 @@ def combine_signals(signals, weights, target_vol):
     Parameters
     ----------
     signals: list(pd.DataFrame)
-        List of Forecast signals or Instrument signals which we want to combine.
+        List of Forecast signals or Subsystem signals which we want to combine.
         Each signal should be a single column DataFrame.
     weights: list(float)
         Weight to assign each signal in the combined result.

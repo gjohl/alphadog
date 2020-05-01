@@ -6,7 +6,7 @@ from alphadog.constants import PROJECT_DIR
 DATA_DIR = os.path.join(PROJECT_DIR, "alphadog/data/csv_files/")
 
 # Yahoo Finance
-OHLCV_COLS = {'open', 'high', 'low', 'close', 'volume'}
+OHLCV_COLS = {'close'} # TODO: {'open', 'high', 'low', 'close', 'volume'}
 YFINANCE_DIR = "yfinance/"
 YFINANCE_REQUIRED_COLS = {'open', 'high', 'low', 'close', 'volume'}
 YFINANCE_SYMBOLS = {"^FTSE", "^FTMC", "^FTAS", "^GSPC", "AWNT05UK.L", "VGOV.L", "IE00BFRTDB69.IR",
