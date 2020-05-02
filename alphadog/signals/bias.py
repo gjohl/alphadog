@@ -1,7 +1,7 @@
 from ..framework.constants import AVG_FORECAST
 
 
-def long_bias_signal(df):
+def long_bias_signal(price_df):
     """
     A signal which is a constant long signal for all of time.
 
@@ -9,7 +9,7 @@ def long_bias_signal(df):
 
     Parameters
     ----------
-    df: pd.DataFrame
+    price_df: pd.DataFrame
         DataFrame to run long bias signal on.
 
     Returns
@@ -18,7 +18,7 @@ def long_bias_signal(df):
         Columnwise long bias signal.
         Returns the same columns as the input.
     """
-    long_bias_df = df.copy()
+    long_bias_df = price_df.copy()
 
     # Set all values to AVG_FORECAST while preserving dtypes
     for col in long_bias_df.columns:
@@ -27,7 +27,7 @@ def long_bias_signal(df):
     return long_bias_df
 
 
-def short_bias_signal(df):
+def short_bias_signal(price_df):
     """
     A signal which is a constant short signal for all of time.
 
@@ -35,7 +35,7 @@ def short_bias_signal(df):
 
     Parameters
     ----------
-    df: pd.DataFrame
+    price_df: pd.DataFrame
         DataFrame to run short bias signal on.
 
     Returns
@@ -44,7 +44,7 @@ def short_bias_signal(df):
         Columnwise short bias signal.
         Returns the same columns as the input.
     """
-    short_bias_df = df.copy()
+    short_bias_df = price_df.copy()
 
     # Set all values to negative AVG_FORECAST while preserving dtypes
     for col in short_bias_df.columns:

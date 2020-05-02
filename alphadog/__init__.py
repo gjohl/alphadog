@@ -1,1 +1,1 @@
-from alphadog.framework.portfolio_framework import Forecast, Subsystem, Portfolio  # noqa
+from alphadog.framework.portfolio import Forecast, Subsystem, Portfolio  # noqa

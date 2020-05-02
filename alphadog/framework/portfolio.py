@@ -15,7 +15,7 @@ from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET
 )
-from alphadog.signals import PARAMETERISED_SIGNALS
+from alphadog.signals import PARAMETERISED_STRATEGIES
 
 
 class Portfolio:
@@ -34,7 +34,7 @@ class Portfolio:
     """
     def __init__(self, instrument_config=None, vol_target=VOL_TARGET):
         """
-        Combine instrument forecasts into a portfolio position for each instrument
+        Combine subsystems into a portfolio position for each instrument.
 
         Parameters
         ----------
@@ -144,7 +144,7 @@ class Subsystem:
 
         forecast_list = []
         for signal_name in self.signals:
-            signal_func = PARAMETERISED_SIGNALS[signal_name]
+            signal_func = PARAMETERISED_STRATEGIES[signal_name]
             input_df = self.price_data.df  # TODO handle passing different data objects to different signals
             forecast = Forecast(signal_func,
                                 {'df': input_df},
@@ -293,12 +293,12 @@ def get_siblings(instrument_config, instrument_name):
     target_values = [target_instrument[level] for level in target_levels]
 
     siblings = []
-    for instrument in instrument_config.keys():
-        instrument_levels = [key for key in instrument.keys() if 'hierarchy' in key]
-        instrument_values = [instrument[level] for level in instrument_levels]
+    for instrument_name, instrument_dict in instrument_config.items():
+        instrument_levels = [key for key in instrument_dict.keys() if 'hierarchy' in key]
+        instrument_values = [instrument_dict[level] for level in instrument_levels]
 
         if instrument_values == target_values:
-            siblings.append(instrument)
+            siblings.append(instrument_name)
 
     return siblings
 
