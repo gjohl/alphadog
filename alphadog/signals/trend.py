@@ -1,8 +1,8 @@
 import numpy as np
 # import pandas as pd
 
-from ..internals.exceptions import ParameterError
-from ..framework.constants import MAX_FORECAST, MIN_FORECAST
+from alphadog.internals.exceptions import ParameterError
+from alphadog.framework.constants import MAX_FORECAST, MIN_FORECAST
 
 
 def momentum_signal(df, fast, slow):

@@ -11,13 +11,13 @@ Keep track of ongoing work and priorities.
 
 ## Plan
 - Flesh out portfolio framework and implement missing functionality
-- Add tests for portfolio_framework.py
 - Create signals_config.json - for each strategy specify the parameters it will run with, the forecast scalar
-- Get data from quandl
 - Consider adding an Instrument class which for each instrument contains: 
   long_name, asset_class, currency, p_weight?, market_data call and params
 - Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
   later FundamentalData, MacroData etc will be consistent?
+- Add tests for portfolio_framework.py
+- Get data from quandl
 - Add tests for yfinance data scripts?
 - Bulk out technical indicators using ta-lib
 - Backfill FINRA data to 2010

@@ -3,19 +3,17 @@ Systematic framework.
 
 Largely follows the methodology in Systematic Trading, Robert Carver.
 """
-import json
-import os
 
 import numpy as np
 import pandas as pd
 
-from alphadog.constants import PROJECT_DIR
 from alphadog.data.retrieval import PriceData
+from alphadog.framework.config_handler import load_default_instrument_config
 from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET
 )
-from alphadog.signals import PARAMETERISED_STRATEGIES
+from alphadog.framework.signals_config import PARAMETERISED_STRATEGIES
 
 
 class Portfolio:
@@ -144,10 +142,10 @@ class Subsystem:
 
         forecast_list = []
         for signal_name in self.signals:
-            signal_func = PARAMETERISED_STRATEGIES[signal_name]
+            signal_func = PARAMETERISED_STRATEGIES[signal_name]['signal_func']
             input_df = self.price_data.df  # TODO handle passing different data objects to different signals
             forecast = Forecast(signal_func,
-                                {'df': input_df},
+                                {'price_df': input_df},
                                 self.instrument_id,
                                 f"{self.instrument_id}|{signal_name}")
             forecast_list.append(forecast)
@@ -220,87 +218,6 @@ class Forecast:
 ###################
 # Portfolio utils #
 ###################
-
-def load_default_instrument_config():
-    """
-    Returns the default instrument config as specified in the json config file.
-
-    Returns
-    -------
-    instrument_config: dict
-        Specifies details of every instrument to run in the portfolio.
-    """
-    config_path = os.path.join(PROJECT_DIR, "alphadog/framework/instrument_config.json")
-
-    with open(config_path) as config_file:
-        instrument_config = json.load(config_file)
-
-    return instrument_config
-
-
-def hierarchy_depth(instrument_dict):
-    """
-    Return the number of levels an instrument has in its hierarchy.
-
-    Parameters
-    ----------
-    instrument_dict: dict
-        A single instrument from the `instrument_config.json`
-
-    Returns
-    -------
-    depth: int
-        The number of instruments in the hierarchy
-
-    Examples
-    --------
-    >>> instrument_config = load_default_instrument_config()
-    >>> instrument_dict = instrument_config['FTSE100']
-    >>> hierarchy_depth(instrument_dict)
-    """
-    levels = [int(key.split('_')[-1]) for key in instrument_dict.keys() if 'hierarchy' in key]
-    if not levels:
-        return 0
-
-    depth = max(levels)
-    if depth != len(levels):
-        raise ValueError(f"Instrument {instrument_dict['instrument_id']}"
-                         f" has skipped a level in its hierarchy")
-
-    return depth
-
-
-def get_siblings(instrument_config, instrument_name):
-    """
-    Return a list of instruments at the same hierarchy level as this instrument.
-
-    Parameters
-    ----------
-    instrument_config: dict, optional
-        Nested dict which specifies details of every instrument to run in the portfolio.
-    instrument_name: str
-        A single instrument to get siblings for.
-
-    Returns
-    -------
-    list
-        Instrument names which are at the same hierarchy level as the given instrument.
-    """
-    # FIXME: this loops through everything. We could track which siblings we have already
-    #  found and skip these
-    target_instrument = instrument_config[instrument_name]
-    target_levels = [key for key in target_instrument.keys() if 'hierarchy' in key]
-    target_values = [target_instrument[level] for level in target_levels]
-
-    siblings = []
-    for instrument_name, instrument_dict in instrument_config.items():
-        instrument_levels = [key for key in instrument_dict.keys() if 'hierarchy' in key]
-        instrument_values = [instrument_dict[level] for level in instrument_levels]
-
-        if instrument_values == target_values:
-            siblings.append(instrument_name)
-
-    return siblings
 
 
 ##################
