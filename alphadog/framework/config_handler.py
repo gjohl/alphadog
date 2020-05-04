@@ -43,8 +43,34 @@ class BaseConfiguration:
         """
         return cls(**input_dict)
 
+    @classmethod
+    def from_identifier(cls, identifier):
+        """
+        Initialise a config object from an identifier.
+
+        Looks up the given identifier in the reference_config for the class.
+
+        Parameters
+        ----------
+        identifier: str
+            The identifier to create a config object for.
+
+        Returns
+        -------
+        :class:`BaseConfiguration`
+            A BaseConfiguration object for the given identifier.
+
+        Examples
+        --------
+        >>> from alphadog.framework.config_handler import Strategy
+        >>> strat = Strategy.from_identifier('VMOM1')
+        """
+        input_dict = cls.reference_config()[identifier]
+        return cls(**input_dict)
+
+    @classmethod
     @abc.abstractmethod
-    def reference_config(self):
+    def reference_config(cls):
         """
         Returns the full config file.
 
@@ -118,7 +144,8 @@ class Strategy(BaseConfiguration):
         """
         super().__init__(**kwargs)
 
-    def reference_config(self):
+    @classmethod
+    def reference_config(cls):
         """
         Returns the full strategy config file.
         """
@@ -176,7 +203,8 @@ class Instrument(BaseConfiguration):
         """
         super().__init__(**kwargs)
 
-    def reference_config(self):
+    @classmethod
+    def reference_config(cls):
         """
         Returns the full strategy config file.
         """
@@ -188,6 +216,36 @@ class Instrument(BaseConfiguration):
         Returns the identifier of the strategy.
         """
         return self.instrument_id
+
+    @property
+    def strategies(self):
+        """
+        dict:
+            The strategies to run on this instrument.
+            {strategy_name: Strategy object}
+        """
+        return {sig_name: Strategy.from_identifier(sig_name)
+                for sig_name in self.signals}
+
+    @property
+    def required_data_fixtures(self):
+        """
+        List of unique data fixtures required for the signals run on this object.
+
+        Returns
+        -------
+        list(str)
+            List of data fixture names.
+        """
+        req_fixtures = []
+        for strat in self.strategies.values():
+            tmp_fixtures = strat.required_data_fixtures
+            if isinstance(tmp_fixtures, list):
+                req_fixtures.extend(tmp_fixtures)
+            elif isinstance(tmp_fixtures, str):
+                req_fixtures.append(tmp_fixtures)
+
+        return list(set(req_fixtures))
 
 
 def hierarchy_depth(object_dict, name=None):
