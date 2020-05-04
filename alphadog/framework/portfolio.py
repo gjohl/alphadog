@@ -3,13 +3,14 @@ Systematic framework.
 
 Largely follows the methodology in Systematic Trading, Robert Carver.
 """
-
 import numpy as np
 import pandas as pd
 
 from alphadog.internals.analytics import cross_sectional_mean
 from alphadog.data.retrieval import PriceData
-from alphadog.framework.config_handler import load_default_instrument_config
+from alphadog.framework.config_handler import (
+    load_default_instrument_config, Instrument
+)
 from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET
@@ -19,21 +20,20 @@ from alphadog.framework.signals_config import PARAMETERISED_STRATEGIES
 
 class Portfolio:
     """
-    Contains Subsystem objects for every instrument traded in the portfolio.
+    Takes an instrument configuration and computes the Subsystem for every Instrument.
 
-    Also calculate portfolio level statistics:
+    For each instrument, calculate associated portfolio parameters
+    (portfolio weights, diversification multipliers), and use these to combine
+    Subsystems to get a target position for each traded Instrument.
+
+    TODO: Also calculate portfolio level statistics:
     - Portfolio returns
     - Correlations
-    - p_weights and diversification multiplier - pass these down to Subsystem objects.
-    - target_position
     - Required trades
-
-    Take in a config yaml file of
-    {'instrument_1': {'strategy_a': params, 'strategy_b': params}
     """
     def __init__(self, instrument_config=None, vol_target=VOL_TARGET):
         """
-        Combine subsystems into a portfolio position for each instrument.
+        Initialise the Portfolio with the supplied instruments.
 
         Parameters
         ----------
@@ -45,8 +45,40 @@ class Portfolio:
             If not supplied, defaults to the constant specified in the framework directory.
         """
         # TODO - handle the instrument's position in the hierarchy
-        self.instrument_config = instrument_config or load_default_instrument_config()
-        self.vol_target = vol_target
+        self._instrument_config = instrument_config or load_default_instrument_config()
+        self._vol_target = vol_target
+
+    @property
+    def instrument_config(self):
+        """
+        dict:
+            Nested dictionary which specifies details of every instrument to run in the portfolio.
+        """
+        return self._instrument_config
+
+    @property
+    def vol_target(self):
+        """float: The target annualised percentage volatility."""
+        return self._vol_target
+
+    @property
+    def traded_instruments(self):
+        """ list(str): instrument_names of all traded instruments."""
+        return [inst_id for inst_id
+                in self.instrument_config.keys()
+                if self.instrument_config[inst_id]['is_traded']]
+
+    def instruments(self):
+        """
+        All Instruments in the portfolio.
+
+        Returns
+        -------
+        dict(Instrument)
+            instrument_name: instrument_object
+        """
+        return {inst_id: Instrument.from_config(self.instrument_config[inst_id])
+                for inst_id in self.traded_instruments}
 
     def run_subsystems(self):
         """
@@ -113,7 +145,7 @@ class Subsystem:
     """
     def __init__(self, instrument_dict, vol_target=VOL_TARGET):
         """
-        Initialise the Subsystem with the supplied forecasts for the instrument
+        Initialise the Subsystem with the supplied forecasts for the instrument.
 
         Parameters
         ----------

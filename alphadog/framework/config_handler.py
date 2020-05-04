@@ -17,6 +17,9 @@ class BaseConfiguration:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def __repr__(self):
+        return f"{self.identifier} Configuration {self.__class__}"
+
     @classmethod
     def from_config(cls, input_dict):
         """
@@ -49,6 +52,7 @@ class BaseConfiguration:
         """
         pass
 
+    @property
     @abc.abstractmethod
     def identifier(self):
         """
@@ -67,8 +71,8 @@ class BaseConfiguration:
         int
             The number of levels this object has in its hierarchy
         """
-        object_dict = self.reference_config()[self.identifier()]
-        return hierarchy_depth(object_dict, self.identifier())
+        object_dict = self.reference_config()[self.identifier]
+        return hierarchy_depth(object_dict, self.identifier)
 
     def siblings(self):
         """
@@ -79,7 +83,7 @@ class BaseConfiguration:
         list
             The sibling objects of the given object
         """
-        return get_siblings(self.reference_config(), self.identifier())
+        return get_siblings(self.reference_config(), self.identifier)
 
 
 class Strategy(BaseConfiguration):
@@ -120,6 +124,7 @@ class Strategy(BaseConfiguration):
         """
         return PARAMETERISED_STRATEGIES
 
+    @property
     def identifier(self):
         """
         Returns the identifier of the strategy.
@@ -177,6 +182,7 @@ class Instrument(BaseConfiguration):
         """
         return load_default_instrument_config()
 
+    @property
     def identifier(self):
         """
         Returns the identifier of the strategy.
