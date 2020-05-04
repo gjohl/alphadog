@@ -7,6 +7,7 @@ Largely follows the methodology in Systematic Trading, Robert Carver.
 import numpy as np
 import pandas as pd
 
+from alphadog.internals.analytics import cross_sectional_mean
 from alphadog.data.retrieval import PriceData
 from alphadog.framework.config_handler import load_default_instrument_config
 from alphadog.framework.constants import (
@@ -93,9 +94,10 @@ class Portfolio:
 
 class Subsystem:
     """
-    Contains all strategies (Forecast objects) and related parameters for a particular instrument.
+    Takes an instrument configuration and calculates all Forecast objects and
+    related parameters for that instrument.
 
-    Combine forecasts and handle position sizing is handled here to give a subsystem position.
+    Combine forecasts and handle position sizing to give a subsystem position.
 
     Contain/calculate:
     - p_weights
@@ -174,12 +176,12 @@ class Forecast:
     """
     Calculate a single strategy on a particular Instrument.
 
-    Takes generic params which is signal function requires to run. This does not have to be
+    Takes generic params which the signal function requires to run. This does not have to be
     a price timeseries; could be fundamental data, machine learned features/parameters.
 
     The signal function can then take this and return a timeseries of forecasts.
     """
-    def __init__(self, signal_func, params, instrument_id, name):
+    def __init__(self, signal_func, params, instrument_id='id', name='forecast'):
         """
         Initialise the forecast with a given function, parameters and optional name.
 
@@ -189,30 +191,87 @@ class Forecast:
             Function to run the signal
         params: dict
             Kwargs to pass to the function
-        instrument_id: str
+        instrument_id: str, optional
             Identifier for the instrument
-        name: str
+        name: str, optional
             Forecast name to identify this signal
         """
-        self.signal_func = signal_func
-        self.params = params
-        self.instrument_id = instrument_id
-        self.name = name
+        self._signal_func = signal_func
+        self._params = params
+        self._instrument_id = instrument_id
+        self._name = name
+
+        self._raw_forecast = None
+        self._forecast_scalar = None
+        self._scaled_forecast = None
+        self._capped_forecast = None
         self.run_signal()
+
+    @property
+    def signal_func(self):
+        """function: Function to run the signal."""
+        return self._signal_func
+
+    @property
+    def params(self):
+        """dict: Parameters to run the signal with."""
+        return self._params
+
+    @property
+    def instrument_id(self):
+        """str: Instrument identifier."""
+        return self._instrument_id
+
+    @property
+    def name(self):
+        """str: Name of the forecast"""
+        return self._name
+
+    @property
+    def raw_forecast(self):
+        """pd.DataFrame: The raw output of running the signal_func with the given parameters."""
+        return self._raw_forecast
+
+    @property
+    def forecast_scalar(self):
+        """
+        pd.Series
+            The multiplier required to scale the raw forecast to have the correct mean value.
+            Returns a float for each column of the raw forecast.
+        """
+        return self._forecast_scalar
+
+    @property
+    def scaled_forecast(self):
+        """pd.DataFrame: The raw forecast scaled to have the correct mean value."""
+        return self._scaled_forecast
+
+    @property
+    def capped_forecast(self):
+        """
+        pd.DataFrame
+            The scaled forecast capped at minimum/maximum values.
+
+            We also combine multicolumn signals by taking the cross-sectional mean.
+            This is equivalent to treating them as separate signals with equal Sharpe ratios
+            and equal pairwise correlations.
+        """
+        return self._capped_forecast
 
     def run_signal(self):
         """
-        Run the signal with the specified params
+        Run the signal with the specified params.
 
-        Returns
-        -------
-        Sets the raw, scaled and capped forecast attributes
+        Populates values for the raw, scaled and capped forecasts.
         """
-        self.raw_forecast = self.signal_func(**self.params)
-        self.forecast_scalar = AVG_FORECAST / self.raw_forecast.abs().mean()
-        self.scaled_forecast = self.raw_forecast * self.forecast_scalar
-        self.capped_forecast = self.scaled_forecast.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
-        # TODO: combine signals if multicolumn
+        self._raw_forecast = self.signal_func(**self.params)
+        self._forecast_scalar = AVG_FORECAST / self.raw_forecast.abs().mean()
+        self._scaled_forecast = self.raw_forecast * self.forecast_scalar
+
+        # We may want to revisit this cross_sectional_mean step in future.
+        capped_forecast = self.scaled_forecast.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
+        capped_forecast = cross_sectional_mean(capped_forecast, self.name)
+        self._capped_forecast = capped_forecast
 
 
 ###################

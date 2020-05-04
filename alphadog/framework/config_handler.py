@@ -143,25 +143,31 @@ class Instrument(BaseConfiguration):
     """
     def __init__(self, **kwargs):
         """
-        traded_instrument
-        traded_info_link
-        cost
-        index
-
+        traded_instrument: str
+            Long name of the instrument.
+        traded_info_link: str
+            URL of the traded instrument.
+        cost: int
+            Cost in bps.
+        index: str
+            The index that this instrument is tracking.
         instrument_id: str
             Name to identify this instrument.
-
-        yfinance_symbol
-        yfinance_link
-        currency
-        is_traded
-
+        yfinance_symbol: str
+            Yahoo finance symbol to identify this instrument.
+        yfinance_link:
+            Yahoo finance URL for this instrument.
+        currency: str
+            ISO currency code.
+        is_traded: bool
+            Flag whether to include this instrument in the portfolio.
         hierarchy_1: str
             Level 1 of the hierarchy
         hierarchy_2: str
             Level 2 of the hierarchy
-
         signals: list(str)
+            List of signal names to include for this instrument.
+            Signal names should correspond to signals in signals_config.
         """
         super().__init__(**kwargs)
 

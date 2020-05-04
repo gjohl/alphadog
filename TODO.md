@@ -17,6 +17,7 @@ Keep track of ongoing work and priorities.
 - Implement MarketData class. Think about design. Inherit from a generic BaseData class so that
   later FundamentalData, MacroData etc will be consistent?
 - Add tests for portfolio_framework.py
+- Add accounting module - see pysystemtrade and quantopian pyfolio and alphalens
 - Get data from quandl
 - Add tests for yfinance data scripts?
 - Bulk out technical indicators using ta-lib
