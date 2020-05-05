@@ -13,7 +13,8 @@ from alphadog.framework.config_handler import (
 )
 from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
-    MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET
+    MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET, VOL_SPAN,
+    TRADING_DAYS_PER_YEAR
 )
 from alphadog.framework.signals_config import PARAMETERISED_STRATEGIES
 
@@ -127,6 +128,7 @@ class Portfolio:
         Returns
         -------
         """
+        # TODO: can this reuse combine_signals?
         # Weight the instrument subsystems and scale to get target portfolio positions.
         diversification_multipliers = [
             get_diversification_multiplier(subsystem.subsystem_position, self.vol_target)
@@ -151,18 +153,11 @@ class Subsystem:
 
     Combine forecasts and handle position sizing to give a subsystem position.
 
-    # TODO: check this list
     Contain/calculate:
-    - p_weights
-    - diversification multiplier
-    - block value
-    - price vol
-    - fx
-    - vol_target
-    - f_weight - pass these down to forecast objects?
+    - forecasts
+    - f_weights
+    - vol scalar - price, fx, vol_target, trading_capital
     - subsystem_position
-    - instrument_position (scale and cap subsystem)
-    - target_position (round)
     """
     def __init__(self, instrument, vol_target=VOL_TARGET):
         """
@@ -225,14 +220,23 @@ class Subsystem:
 
     @property
     def vol_scalar(self):
-        """float: Volatility scalar required to achieve the target vol."""
-        # TODO: improve docstring: what actually is vol scalar
+        """
+        pd.Series:
+            Volatility scalar.
+            The number of instrument blocks required to hit the volatility target
+            with an average forecast.
+        """
         return self._vol_scalar
 
     @property
     def subsystem_position(self):
         """pd.DataFrame: Target position to take in this instrument."""
         return self._subsystem_position
+
+    @property
+    def currency(self):
+        """str: Currency ISO code."""
+        return self.instrument.currency
 
     @property
     def instrument_id(self):
@@ -243,11 +247,6 @@ class Subsystem:
     def is_traded(self):
         """bool: Flags whether this instrument is traded."""
         return self.instrument.is_traded
-
-    @property
-    def currency(self):
-        """str: Currency ISO code."""
-        return self.instrument.currency
 
     @property
     def strategies(self):
@@ -350,6 +349,7 @@ class Forecast:
         self._forecast_scalar = None
         self._scaled_forecast = None
         self._capped_forecast = None
+
         self.run_signal()
 
     @property
@@ -419,14 +419,98 @@ class Forecast:
         self._capped_forecast = capped_forecast
 
 
-###################
-# Portfolio utils #
-###################
+#########
+# Utils #
+#########
+
+def get_diversification_multiplier(signal_df, vol_target):
+    """
+    Return the diversification multiplier for a combined signal.
+
+    Parameters
+    ----------
+    signal_df: pd.DataFrame
+        A single column DataFrame which is typically the result of combining other signals.
+    vol_target: float
+        The target annualised percentage volatility.
+
+    Returns
+    -------
+    div_multiplier: pd.DataFrame
+        The scaling factor to scale the input `signal_df` by to make it achieve the `target_vol`.
+    """
+    assert vol_target > 0
+
+    signal_vol = signal_df.ewm(span=VOL_SPAN).std() * 100
+    daily_vol_target = vol_target / np.sqrt(TRADING_DAYS_PER_YEAR)
+    div_multiplier = daily_vol_target / signal_vol
+    div_multiplier = div_multiplier.clip(upper=MAX_DIVERSIFICATION_MULTIPLIER)
+
+    return div_multiplier
 
 
-##################
-# Forecast utils #
-##################
+def combine_signals(signals, weights, vol_target):
+    """
+    Combine the input signals as the weighted sum, and scale the result to reach the `target_vol`.
+
+    Parameters
+    ----------
+    signals: list(pd.DataFrame)
+        List of Forecast signals or Subsystem signals which we want to combine.
+        Each signal should be a single column DataFrame.
+    weights: list(float)
+        Weight to assign each signal in the combined result.
+    vol_target: float
+        The target annualised percentage volatility.
+
+    Returns
+    -------
+    combined_df: pd.DataFrame
+        A single column DataFrame which is the weighted sum of input DataFrames, scaled to
+        achieve the vol target.
+    """
+    # Check the weights are valid
+    assert len(signals) == len(weights)
+    assert np.isclose(sum(weights), 1)
+
+    # Combine signals according to their weights
+    weighted_forecasts = sum(x * y for x, y in zip(signals, weights))
+
+    # Scale back up to vol target
+    div_multiplier = get_diversification_multiplier(weighted_forecasts, vol_target)
+    combined_df = weighted_forecasts * div_multiplier
+    combined_df = combined_df.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
+
+    return combined_df
+
+
+############################
+# Portfolio-specific utils #
+############################
+
+def get_pweights(subsystem_list):
+    """
+    Return a list of portfolio weights for a given subsystem list
+
+    Parameters
+    ----------
+    subsystem_list: list(Subsystem)
+        The subsystems to include in a portfolio.
+
+    Returns
+    -------
+    pweights: list(float)
+        The fraction of the portfolio to allocate to each Subsystem in the list.
+    """
+    # TODO: As a first pass this just assigns equal weights. Calculate this correctly.
+    #   It may make sense to combine the logic for fweights and pweights into a single function
+    #   and call that here and in get_fweights.
+    return get_fweights(subsystem_list)
+
+
+############################
+# Subsystem-specific utils #
+############################
 
 def get_fweights(forecast_list):
     """
@@ -451,103 +535,45 @@ def get_fweights(forecast_list):
     return fweights
 
 
-def get_pweights(subsystem_list):
-    """
-    Return a list of portfolio weights for a given subsystem list
-
-    Parameters
-    ----------
-    subsystem_list: list(Subsysytem)
-        The subsystems to include in a portfolio.
-
-    Returns
-    -------
-    pweights: list(float)
-        The fraction of the portfolio to allocate to each Subsystem in the list.
-    """
-    # TODO: As a first pass this just assigns equal weights. Calculate this correctly.
-    #   It may make sense to combine the logic for fweights and pweights into a single function
-    #   and call that here and in get_fweights.
-    return get_fweights(subsystem_list)
-
-
-def get_diversification_multiplier(signal_df, target_vol):
-    """
-    Return the diversification multiplier for a combined signal
-
-    Parameters
-    ----------
-    signal_df: pd.DataFrame
-        A single column DataFrame which is typically the result of combining other signals.
-    target_vol: float
-        The target annualised percentage volatility.
-
-    Returns
-    -------
-    div_multiplier: float
-        The scaling factor to scale the input `signal_df` by to make it achieve the `target_vol`.
-    """
-    # TODO: As a first pass, just scale by the volatility of however much data we have.
-    #  Perhaps we may want to try a rolling window and/or ewmvol?
-    assert target_vol > 0
-
-    signal_vol = signal_df.std().values[0]
-    div_multiplier = min(target_vol / signal_vol, MAX_DIVERSIFICATION_MULTIPLIER)
-
-    return div_multiplier
-
-
-def combine_signals(signals, weights, target_vol):
-    """
-    Combine the input signals as the weighted sum, and scale the result to reach the `target_vol`.
-
-    Parameters
-    ----------
-    signals: list(pd.DataFrame)
-        List of Forecast signals or Subsystem signals which we want to combine.
-        Each signal should be a single column DataFrame.
-    weights: list(float)
-        Weight to assign each signal in the combined result.
-    target_vol: float
-        The target annualised percentage volatility.
-
-    Returns
-    -------
-    combined_df: pd.DataFrame
-        A single column DataFrame which is the weighted sum of input DataFrames, scaled to
-        achieve the vol target.
-    """
-    # Check the weights are valid
-    assert len(signals) == len(weights)
-    assert np.isclose(sum(weights), 1)
-
-    # Combine signals according to their weights
-    weighted_forecasts = sum(x * y for x, y in zip(signals, weights))
-
-    # Scale back up to vol target
-    div_multiplier = get_diversification_multiplier(weighted_forecasts, target_vol)
-    combined_df = weighted_forecasts * div_multiplier
-
-    # TODO: also cap here?
-
-    return combined_df
-
-
-def get_vol_scalar():
+def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital=None):
     """
     Calculate the volatility scalar for a given instrument.
 
+    Instrument value volatility gives the vol contribution per block of the instrument.
+    Ignoring forecasts for the moment, the vol_scalar gives the number of blocks to buy to achieve the
+    vol target using this instrument alone.
+
     Parameters
     ----------
-    block_value
-    price_vol
-    fx_rate
-    target_vol
+    price_df: pd.DataFrame
+        Daily close price of the instrument being traded. This assumes equities only.
+    fx_rate: pd.DataFrame
+        Daily FX rate to GBP
+    vol_target: float
+        The target annualised percentage volatility.
+    trading_capital: pd.DataFrame
+        Timeseries of capital available to invest. GBP amount.
 
     Returns
     -------
-    vol_scalar: float
+    vol_scalar: pd.Series
         The volatility scalar for a given instrument.
+        This is the number of blocks of the given instrument required to hit the vol target.
     """
-    # TODO: This is not yet implemented.
-    return 1.
+    # FIXME: This is not yet implemented.
+    if price_df:
+        # Characteristics of the instrument
+        block_value = price_df.copy()  # TODO: this works for equities only
+        price_vol = price_df.ewm(span=VOL_SPAN).std()
+        instrument_currency_vol = block_value * price_vol
+        instrument_value_vol = instrument_currency_vol * fx_rate  # TODO: check conversion is the right way around
+
+        # Characteristics of the portfolio
+        cash_vol_target_annualised = vol_target * trading_capital
+        cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
+
+        vol_scalar = cash_vol_target_daily / instrument_value_vol
+
+        return vol_scalar
+    else:
+        return 1.

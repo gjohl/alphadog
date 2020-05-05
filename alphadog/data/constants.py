@@ -9,8 +9,6 @@ DATA_DIR = os.path.join(PROJECT_DIR, "alphadog/data/csv_files/")
 OHLCV_COLS = {'close'} # TODO: {'open', 'high', 'low', 'close', 'volume'}
 YFINANCE_DIR = "yfinance/"
 YFINANCE_REQUIRED_COLS = {'open', 'high', 'low', 'close', 'volume'}
-YFINANCE_SYMBOLS = {"^FTSE", "^FTMC", "^FTAS", "^GSPC", "AWNT05UK.L", "VGOV.L", "IE00BFRTDB69.IR",
-                    "GOVY.L", "IE00B1S74W91.IR", "LQD", "INXG.L", "FFR"}
 YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING = {
     "^FTSE": "FTSE100",
     "^FTMC": "FTSE250",
@@ -25,6 +23,9 @@ YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING = {
     "INXG.L": "UKILB",
     "FFR": "GLOBALREIT"
 }
+# TODO: derived the symbol list from the mapping
+YFINANCE_SYMBOLS = {"^FTSE", "^FTMC", "^FTAS", "^GSPC", "AWNT05UK.L", "VGOV.L", "IE00BFRTDB69.IR",
+                    "GOVY.L", "IE00B1S74W91.IR", "LQD", "INXG.L", "FFR"}
 
 # FINRA Short Volume
 FINRA_DIR = "finra/"

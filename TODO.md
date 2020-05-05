@@ -10,6 +10,27 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
+- FX data:
+-- Get FX data - GBP, GBX, EUR, USD - add these to the yfinance symbol mapping and run a backfill
+-- Write get_fx function in data.retrieval - PriceData.from_instrument_id(fx_symbol)
+-- Add fx_rate property to Subsystem
+
+- Implement vol_scalar
+-- Add trading_capital csv
+-- Handle reindexing trading_capital, calculating new capital to ffill etc
+-- Add test for vol_scalar
+
+- Calculate weights
+-- Manually assign top level (level1) hierarchy weights in config. 
+   Recalc/re-normalised these per instrument if a toplevel strategy is not used at all for that instrument. 
+-- Begin by assigning the lower levels equally
+-- Outline function to correctly assign lower level weights
+
+- Handle passing different data objects from required_data_fixtures
+-- Constant dict which maps each fixture name to the data retrieval function.
+   Assume we alway pass the instrument ID to this?
+
+- The rest
 - Flesh out portfolio framework and implement missing functionality
 - Create signals_config.json - for each strategy specify the parameters it will run with, the forecast scalar
 - Consider adding an Instrument class which for each instrument contains: 
@@ -22,6 +43,7 @@ Keep track of ongoing work and priorities.
 - Add tests for yfinance data scripts?
 - Bulk out technical indicators using ta-lib
 - Backfill FINRA data to 2010
+- Consider mongodb/arctic for data storage?
   
   
 ## Done
