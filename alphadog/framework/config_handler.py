@@ -213,7 +213,7 @@ class Instrument(BaseConfiguration):
     @property
     def identifier(self):
         """
-        Returns the identifier of the strategy.
+        Returns the identifier of the instrument.
         """
         return self.instrument_id
 
@@ -222,10 +222,15 @@ class Instrument(BaseConfiguration):
         """
         dict:
             The strategies to run on this instrument.
-            {strategy_name: Strategy object}
+            This is in the format: {strategy_name: Strategy object}
+
+            If the instrument is not traded, this returns an empty dict.
         """
-        return {sig_name: Strategy.from_identifier(sig_name)
-                for sig_name in self.signals}
+        if self.is_traded:
+            return {sig_name: Strategy.from_identifier(sig_name)
+                    for sig_name in self.signals}
+        else:
+            return {}
 
     @property
     def required_data_fixtures(self):
@@ -237,6 +242,9 @@ class Instrument(BaseConfiguration):
         list(str)
             List of data fixture names.
         """
+        if not self.is_traded:
+            return []
+
         req_fixtures = []
         for strat in self.strategies.values():
             tmp_fixtures = strat.required_data_fixtures

@@ -48,6 +48,11 @@ class Portfolio:
         self._instrument_config = instrument_config or load_default_instrument_config()
         self._vol_target = vol_target
 
+        self._subsystems = None
+        self._diversification_multipliers = None
+        self._pweights = None
+        self._target_position = None
+
     @property
     def instrument_config(self):
         """
@@ -62,12 +67,33 @@ class Portfolio:
         return self._vol_target
 
     @property
+    def subsystems(self):
+        """list(Subsystem): All subsystems in the portfolio."""
+        return self._subsystems
+
+    @property
+    def diversification_multipliers(self):
+        """list(float): Diversification scalar for each subsystem."""
+        return self._diversification_multipliers
+
+    @property
+    def pweights(self):
+        """list(float): Portfolio weights for each subsystem."""
+        return self._pweights
+
+    @property
+    def target_position(self):
+        """pd.DataFrame: Target position for each instrument in the portfolio."""
+        return self._target_position
+
+    @property
     def traded_instruments(self):
         """ list(str): instrument_names of all traded instruments."""
         return [inst_id for inst_id
                 in self.instrument_config.keys()
                 if self.instrument_config[inst_id]['is_traded']]
 
+    @property
     def instruments(self):
         """
         All Instruments in the portfolio.
@@ -86,18 +112,13 @@ class Portfolio:
 
         Returns
         -------
-        Sets forecast_list and capped_forecasts
+        Sets subsystems
         """
-        instrument_ids = list(self.instrument_config.keys())
         subsystem_list = []
-        for instrument_id in instrument_ids:
-            try:
-                instrument_dict = self.instrument_config[instrument_id]
-                subsystem = Subsystem(instrument_dict)
-                subsystem_list.append(subsystem)
-            except:
-                print(f"Failed on {instrument_id}")
-        self.subsystem_list = subsystem_list
+        for inst_id, inst in self.instruments.items():
+            subsystem_list.append(Subsystem(inst))
+
+        self._subsystems = subsystem_list
 
     def combine_subsystems(self):
         """
@@ -106,31 +127,31 @@ class Portfolio:
         Returns
         -------
         """
-
         # Weight the instrument subsystems and scale to get target portfolio positions.
         diversification_multipliers = [
             get_diversification_multiplier(subsystem.subsystem_position, self.vol_target)
-            for subsystem in self.subsystem_list
+            for subsystem in self.subsystems
         ]
-        self.diversification_multipliers = diversification_multipliers
-        self.pweights = get_pweights(self.subsystem_list)
+        self._diversification_multipliers = diversification_multipliers
+        self._pweights = get_pweights(self.subsystems)
 
         # TODO: account for missing data, varying pweights
         weighted_subsystems = [
             subsystem.subsystem_position * weight * div_mult for subsystem, weight, div_mult
-            in zip(self.subsystem_list, self.pweights, self.diversification_multipliers)
+            in zip(self.subsystems, self.pweights, self.diversification_multipliers)
         ]
 
-        self.target_position = pd.concat(weighted_subsystems, axis=1).sum(axis=1)
+        self._target_position = pd.concat(weighted_subsystems, axis=1).sum(axis=1)
 
 
 class Subsystem:
     """
-    Takes an instrument configuration and calculates all Forecast objects and
-    related parameters for that instrument.
+    Takes an instrument configuration from an Instrument object and calculates
+    all Forecast objects and related parameters for that instrument.
 
     Combine forecasts and handle position sizing to give a subsystem position.
 
+    # TODO: check this list
     Contain/calculate:
     - p_weights
     - diversification multiplier
@@ -143,27 +164,120 @@ class Subsystem:
     - instrument_position (scale and cap subsystem)
     - target_position (round)
     """
-    def __init__(self, instrument_dict, vol_target=VOL_TARGET):
+    def __init__(self, instrument, vol_target=VOL_TARGET):
         """
         Initialise the Subsystem with the supplied forecasts for the instrument.
 
         Parameters
         ----------
-        instrument_dict: dict
-            A single instrument from the `instrument_config.json`
+        instrument: Instrument
+            A single instrument to run.
         vol_target: float
             The target annualised percentage volatility.
         """
-        self.instrument_id = instrument_dict['instrument_id']
-        self.is_traded = instrument_dict['is_traded']
-        self.currency = instrument_dict['currency']
-        self.signals = instrument_dict['signals'] if self.is_traded else []
-        self.vol_target = vol_target
+        self._instrument = instrument
+        self._vol_target = vol_target
+
+        # TODO handle loading required data fixtures
+        self.data = {}
         self.price_data = PriceData.from_instrument_id(self.instrument_id)
 
         # TODO - handle the signal's position in the hierarchy
+        self._forecast_list = None
+        self._capped_forecasts = None
+        self._fweights = None
+        self._combined_forecast = None
+        self._vol_scalar = None
+        self._subsystem_position = None
+
         self.run_forecasts()
-        self.combine_forecasts()
+        self.calc_position()
+
+    @property
+    def instrument(self):
+        """Instrument: The Instrument object to run the Subsystem for."""
+        return self._instrument
+
+    @property
+    def vol_target(self):
+        """float: The target annualised percentage volatility."""
+        return self._vol_target
+
+    @property
+    def forecast_list(self):
+        """list(Forecast): List of Forecasts for the strategies run on this instrument."""
+        return self._forecast_list
+
+    @property
+    def capped_forecasts(self):
+        """list(pd.DataFrame): List of capped forecast DataFrames, one per strategy."""
+        return self._capped_forecasts
+
+    @property
+    def fweights(self):
+        """list(float): Forecast weights."""
+        return self._fweights
+
+    @property
+    def combined_forecast(self):
+        """pd.DataFrame: Forecasts weighted and vol scaled."""
+        return self._combined_forecast
+
+    @property
+    def vol_scalar(self):
+        """float: Volatility scalar required to achieve the target vol."""
+        # TODO: improve docstring: what actually is vol scalar
+        return self._vol_scalar
+
+    @property
+    def subsystem_position(self):
+        """pd.DataFrame: Target position to take in this instrument."""
+        return self._subsystem_position
+
+    @property
+    def instrument_id(self):
+        """str: The instrument identifier."""
+        return self.instrument.instrument_id
+
+    @property
+    def is_traded(self):
+        """bool: Flags whether this instrument is traded."""
+        return self.instrument.is_traded
+
+    @property
+    def currency(self):
+        """str: Currency ISO code."""
+        return self.instrument.currency
+
+    @property
+    def strategies(self):
+        """dict: Strategies to run for this instrument."""
+        return self.instrument.strategies
+
+    @property
+    def required_data_fixtures(self):
+        """
+        List of unique data fixtures required for the signals run on this object.
+
+        Returns
+        -------
+        list(str)
+            List of data fixture names.
+        """
+        return self.instrument.required_data_fixtures
+
+    def load_data_fixtures(self):
+        """
+        Load all data required for the strategies to be run on this instrument.
+
+        Returns
+        -------
+        dict:
+            All data fixtures required for this instrument, in the format:
+            {fixture_name: fixture_df}
+        """
+        # FIXME: append to self.data
+        raise NotImplementedError()
 
     def run_forecasts(self):
         """
@@ -171,37 +285,36 @@ class Subsystem:
 
         Returns
         -------
-        Sets forecast_list and capped_forecasts
+        Sets the forecast_list and capped_forecasts properties of the Subsystem.
         """
-
         forecast_list = []
-        for signal_name in self.signals:
-            signal_func = PARAMETERISED_STRATEGIES[signal_name]['signal_func']
+        for strat in self.strategies.values():
+            signal_func = strat.signal_func
             input_df = self.price_data.df  # TODO handle passing different data objects to different signals
             forecast = Forecast(signal_func,
                                 {'price_df': input_df},
                                 self.instrument_id,
-                                f"{self.instrument_id}|{signal_name}")
+                                f"{self.instrument_id}|{strat.strategy_name}")
             forecast_list.append(forecast)
 
-        self.forecast_list = forecast_list
-        self.capped_forecasts = [fc.capped_forecast for fc in forecast_list]
+        self._forecast_list = forecast_list
+        self._capped_forecasts = [fc.capped_forecast for fc in forecast_list]
 
-    def combine_forecasts(self):
+    def calc_position(self):
         """
-        Combine all signals in the subsystem and scale
+        Combine all signals in the subsystem, combine and scale.
 
         Returns
         -------
-
+        Sets the subsystem_position and associated parameters.
         """
         # Combine signals
-        self.fweights = get_fweights(self.capped_forecasts)
-        self.combined_forecasts = combine_signals(self.capped_forecasts, self.fweights, self.vol_target)  # noqa
+        self._fweights = get_fweights(self.capped_forecasts)
+        self._combined_forecast = combine_signals(self.capped_forecasts, self.fweights, self.vol_target)  # noqa
 
         # Calc subsystem position
-        self.vol_scalar = get_vol_scalar()  # TODO: implement this
-        self.subsystem_position = self.vol_scalar * self.combined_forecasts / AVG_FORECAST
+        self._vol_scalar = get_vol_scalar()  # TODO: implement this
+        self._subsystem_position = self.vol_scalar * self.combined_forecast / AVG_FORECAST
 
 
 class Forecast:
