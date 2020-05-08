@@ -21,15 +21,17 @@ YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING = {
     "IE00B1S74W91.IR": "UKCORP",
     "LQD": "GLOBALCORP",
     "INXG.L": "UKILB",
-    "FFR": "GLOBALREIT"
+    "FFR": "GLOBALREIT",
+    "GBPUSD=X": "GBPUSD",
+    "USDGBP=X": "USDGBP",
+    "EURUSD=X": "EURUSD",
+    "USDEUR=X": "USDEUR",
+    "GBPEUR=X": "GBPEUR",
+    "EURGBP=X": "EURGBP",
 }
-# TODO: derived the symbol list from the mapping
-YFINANCE_SYMBOLS = {"^FTSE", "^FTMC", "^FTAS", "^GSPC", "AWNT05UK.L", "VGOV.L", "IE00BFRTDB69.IR",
-                    "GOVY.L", "IE00B1S74W91.IR", "LQD", "INXG.L", "FFR"}
+YFINANCE_SYMBOLS = set(YFINANCE_SYMBOL_INSTRUMENT_ID_MAPPING.keys())
 
 # FINRA Short Volume
 FINRA_DIR = "finra/"
 FINRA_BASE_URL = 'http://regsho.finra.org/'
 FINRA_EXCHANGES = ['CNMS', 'FNQC', 'FNRA', 'FNSQ', 'FNYX', 'FORF']
-
-

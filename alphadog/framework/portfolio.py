@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from alphadog.internals.analytics import cross_sectional_mean
+from alphadog.internals.fx import get_fx
 from alphadog.data.retrieval import PriceData
 from alphadog.framework.config_handler import (
     load_default_instrument_config, Instrument
@@ -14,7 +15,8 @@ from alphadog.framework.config_handler import (
 from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET, VOL_SPAN,
-    TRADING_DAYS_PER_YEAR
+    TRADING_DAYS_PER_YEAR, PORTFOLIO_CCY,
+    STARTING_CAPITAL
 )
 from alphadog.framework.signals_config import PARAMETERISED_STRATEGIES
 
@@ -239,6 +241,14 @@ class Subsystem:
         return self.instrument.currency
 
     @property
+    def fx_rate(self):
+        """
+        pd.DataFrame, float:
+            The multiplicative FX rate to convert this instrument to the portfolio currency.
+        """
+        return get_fx(self.currency, PORTFOLIO_CCY)
+
+    @property
     def instrument_id(self):
         """str: The instrument identifier."""
         return self.instrument.instrument_id
@@ -264,6 +274,14 @@ class Subsystem:
             List of data fixture names.
         """
         return self.instrument.required_data_fixtures
+
+    @property
+    def trading_capital(self):
+        """
+        TODO: This is currently a constant.
+         This should be a timeseries to reflect rolling up gains / rolling down losses.
+        """
+        return STARTING_CAPITAL
 
     def load_data_fixtures(self):
         """
@@ -312,7 +330,9 @@ class Subsystem:
         self._combined_forecast = combine_signals(self.capped_forecasts, self.fweights, self.vol_target)  # noqa
 
         # Calc subsystem position
-        self._vol_scalar = get_vol_scalar()  # TODO: implement this
+        self._vol_scalar = get_vol_scalar(
+            self.price_data.df, self.fx_rate, self.vol_target, self.trading_capital
+        )
         self._subsystem_position = self.vol_scalar * self.combined_forecast / AVG_FORECAST
 
 
@@ -540,8 +560,8 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
     Calculate the volatility scalar for a given instrument.
 
     Instrument value volatility gives the vol contribution per block of the instrument.
-    Ignoring forecasts for the moment, the vol_scalar gives the number of blocks to buy to achieve the
-    vol target using this instrument alone.
+    Ignoring forecasts for the moment, the vol_scalar gives the number of blocks to buy to achieve
+    the vol target using this instrument alone.
 
     Parameters
     ----------
@@ -553,6 +573,10 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
         The target annualised percentage volatility.
     trading_capital: pd.DataFrame
         Timeseries of capital available to invest. GBP amount.
+        TODO: This is currently a scalar starting amount which does not reflect
+         rolling up/ rolling down losses.
+         The current implementation is equivalent to adding capital following losses and
+         removing gains, so this does not reflect any compounding
 
     Returns
     -------
@@ -560,20 +584,16 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
         The volatility scalar for a given instrument.
         This is the number of blocks of the given instrument required to hit the vol target.
     """
-    # FIXME: This is not yet implemented.
-    if price_df:
-        # Characteristics of the instrument
-        block_value = price_df.copy()  # TODO: this works for equities only
-        price_vol = price_df.ewm(span=VOL_SPAN).std()
-        instrument_currency_vol = block_value * price_vol
-        instrument_value_vol = instrument_currency_vol * fx_rate  # TODO: check conversion is the right way around
+    # Characteristics of the instrument
+    block_value = price_df.copy()  # TODO: this works for equities only
+    price_vol = price_df.ewm(span=VOL_SPAN).std()
+    instrument_currency_vol = block_value * price_vol
+    instrument_value_vol = instrument_currency_vol * fx_rate  # TODO: check conversion is the right way around
 
-        # Characteristics of the portfolio
-        cash_vol_target_annualised = vol_target * trading_capital
-        cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
+    # Characteristics of the portfolio
+    cash_vol_target_annualised = vol_target * trading_capital
+    cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
 
-        vol_scalar = cash_vol_target_daily / instrument_value_vol
+    vol_scalar = cash_vol_target_daily / instrument_value_vol
 
-        return vol_scalar
-    else:
-        return 1.
+    return vol_scalar
