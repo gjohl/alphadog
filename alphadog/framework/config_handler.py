@@ -7,7 +7,7 @@ import os
 
 from alphadog.constants import PROJECT_DIR
 from alphadog.framework.signals_config import PARAMETERISED_STRATEGIES
-
+from alphadog.framework.weights import STRATEGY_WEIGHTS, INSTRUMENT_WEIGHTS
 
 class BaseConfiguration:
     """
@@ -88,6 +88,16 @@ class BaseConfiguration:
         """
         pass
 
+    @property
+    @abc.abstractmethod
+    def weight_config(self):
+        """
+        Returns the manually defined weights config, which currently give the level_1 weights.
+
+        Abstract method to be implemented by the child class.
+        """
+        pass
+
     def depth(self):
         """
         The depth of the hierarchy where this object resides.
@@ -152,6 +162,11 @@ class Strategy(BaseConfiguration):
         return PARAMETERISED_STRATEGIES
 
     @property
+    def weight_config(self):
+        """dict: The level_1 weights."""
+        return STRATEGY_WEIGHTS
+
+    @property
     def identifier(self):
         """
         Returns the identifier of the strategy.
@@ -209,6 +224,12 @@ class Instrument(BaseConfiguration):
         Returns the full strategy config file.
         """
         return load_default_instrument_config()
+
+    @property
+    def weight_config(self):
+        """dict: The level_1 weights."""
+        return INSTRUMENT_WEIGHTS
+
 
     @property
     def identifier(self):

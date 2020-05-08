@@ -263,6 +263,23 @@ class Subsystem:
         """dict: Strategies to run for this instrument."""
         return self.instrument.strategies
 
+    def strategy_weights(self):
+        """
+        Calculate the weight associated with each strategy.
+
+        For now, assign equal weights per level of the hierarchy.
+        Later we can upweight/downweight based on performance and correlations.
+
+        Returns
+        -------
+        dict:
+            Return the weight for each strategy in the format
+            {strategy_name: weight}
+        """
+        # for strat in self.strategies:
+        #     weight_level_1 = strat.
+        pass
+
     @property
     def required_data_fixtures(self):
         """
