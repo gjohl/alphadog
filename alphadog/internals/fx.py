@@ -26,6 +26,12 @@ def get_fx(from_ccy, to_ccy):
         Time series of FX rates.
         Returns a float if this is constant (e.g. 100 GBX = 1 GBP)
     """
+    multiplier = None
+
+    # Handle no conversion
+    if from_ccy == to_ccy:
+        return 1.
+
     # Handle GBX
     if from_ccy == 'GBX':
         if to_ccy == 'GBP':
@@ -41,14 +47,11 @@ def get_fx(from_ccy, to_ccy):
             to_ccy = 'GBP'
             multiplier = 100.
 
-    # Handle no conversion
-    if from_ccy == to_ccy:
-        return 1.
-
     # Convert currency
     ccy_pair = from_ccy + to_ccy
     fx_data = PriceData.from_instrument_id(ccy_pair)
     fx_df = fx_data.df
+    fx_df = fx_df.rename(columns={'close': ccy_pair})
 
     # Multiply for pounds/pence if necessary
     if multiplier:

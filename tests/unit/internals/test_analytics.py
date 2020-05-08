@@ -1,5 +1,8 @@
+from alphadog.internals.analytics import cross_sectional_mean
+
+
 class TestCrossSectionalMean:
-    # TODO: implement tests
+    # TODO TEST: implement tests
 
     def test_single_column(self):
         pass
