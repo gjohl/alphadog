@@ -9,8 +9,7 @@ from alphadog.data.constants import OHLCV_COLS
 ######################
 
 def staleness(input_df):
-    """
-    Returns the number of days since the last update.
+    """Returns the number of days since the last update.
 
     Measures how up-to-date the data is.
 

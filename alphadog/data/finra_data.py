@@ -12,7 +12,8 @@ from alphadog.data.constants import (
 
 
 def get_finra_data(date, exchange):
-    """Scrape FINRA short volume data.
+    """
+    Scrape FINRA short volume data.
 
     Retrieve the txt file for a given FINRA exchange-date and save it to disk.
 
@@ -40,7 +41,8 @@ def get_finra_data(date, exchange):
 
 
 def backfill_finra_data(start_date, end_date=None, exchanges=FINRA_EXCHANGES):
-    """Backfill FINRA data for the given date range
+    """
+    Backfill FINRA data for the given date range.
 
     Parameters
     ----------
@@ -69,7 +71,8 @@ def backfill_finra_data(start_date, end_date=None, exchanges=FINRA_EXCHANGES):
 
 
 def load_finra_data(date, exchange='CNMS'):
-    """Load a saved FINRA file for a given date and exchange.
+    """
+    Load a saved FINRA file for a given date and exchange.
 
     Parameters
     ----------

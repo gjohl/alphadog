@@ -29,7 +29,7 @@ class BaseData:
         self.staleness = staleness(input_df)
 
     def __repr__(self):
-        return self.df.__repr__()
+        return f"{self.name} {self.__class__}"
 
     @classmethod
     def from_dataframe(cls, input_df, name=None):
