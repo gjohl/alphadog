@@ -10,11 +10,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Calculate weights
--- Manually assign top level (level1) hierarchy weights in config. 
-   Recalc/re-normalised these per instrument if a toplevel strategy is not used at all for that instrument. 
--- Begin by assigning the lower levels equally
--- Outline function to correctly assign lower level weights
 
 - Handle passing different data objects from required_data_fixtures
 -- Constant dict which maps each fixture name to the data retrieval function.
@@ -22,14 +17,17 @@ Keep track of ongoing work and priorities.
 
 - The rest
 - Flesh out portfolio framework and implement missing functionality
-- Add tests for portfolio_framework.py
--- Add trading_capital csv, Handle reindexing trading_capital, calculating new capital to ffill etc
+- Add tests for framework module
+- Add tests for TODO TEST placeholders
+- Add trading_capital csv, Handle reindexing trading_capital, calculating new capital to ffill etc
+- Add discretionary forecasts to data.inputs - date, instrument_id, forecast
 - Add accounting module - see pysystemtrade and quantopian pyfolio and alphalens
-- Get data from quandl
-- Add tests for yfinance data scripts?
 - Bulk out technical indicators using ta-lib
 - Backfill FINRA data to 2010
+- Get data from quandl
 - Consider mongodb/arctic for data storage?
+- Alter weights based on bootstrapped backtests - run once as research and hard code these? Also
+  handle missing items correctly
   
   
 ## Done
@@ -63,6 +61,8 @@ Keep track of ongoing work and priorities.
 -- Write get_fx function in data.retrieval - PriceData.from_instrument_id(fx_symbol)
 -- Add fx_rate property to Subsystem
 - Implement vol_scalar
+- Add some tests and tidy unused/empty modules
+- Calculate weights. Manually assign hierarchy weights in config. 
 
 
 ## To Read:
@@ -72,6 +72,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Future modules:
-- evaluation - maybe roll this into portfolio_management
+- accounting - maybe roll this into portfolio_management
 - execution - once trading is automated
 - risk

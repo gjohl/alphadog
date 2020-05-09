@@ -18,7 +18,7 @@ from alphadog.framework.constants import (
     TRADING_DAYS_PER_YEAR, PORTFOLIO_CCY,
     STARTING_CAPITAL
 )
-from alphadog.framework.signals_config import PARAMETERISED_STRATEGIES
+from alphadog.framework.weights import STRATEGY_WEIGHTS, INSTRUMENT_WEIGHTS
 
 
 class Portfolio:
@@ -109,6 +109,26 @@ class Portfolio:
         return {inst_id: Instrument.from_config(self.instrument_config[inst_id])
                 for inst_id in self.traded_instruments}
 
+    @property
+    def instrument_weights(self):
+        """
+        Calculate the weight associated with each instrument.
+
+        Currently uses hard-coded weights from config.
+
+        Returns
+        -------
+        dict:
+            Return the weight for each instrument in the format
+            {instrument_id: weight}
+        """
+        weights_dict = {}
+        for instrument_id, instrument in self.instruments.items():
+            weight = get_weights_from_config(instrument, INSTRUMENT_WEIGHTS)
+            weights_dict[instrument_id] = weight
+
+        return weights_dict
+
     def run_subsystems(self):
         """
         Run all subsystems supplied for the Instrument.
@@ -118,10 +138,14 @@ class Portfolio:
         Sets subsystems
         """
         subsystem_list = []
-        for inst_id, inst in self.instruments.items():
-            subsystem_list.append(Subsystem(inst))
+        pweight_list = []
+
+        for instrument_id, instrument in self.instruments.items():
+            subsystem_list.append(Subsystem(instrument))
+            pweight_list.append(self.instrument_weights[instrument_id])
 
         self._subsystems = subsystem_list
+        self._pweights = pweight_list
 
     def combine_subsystems(self):
         """
@@ -137,7 +161,6 @@ class Portfolio:
             for subsystem in self.subsystems
         ]
         self._diversification_multipliers = diversification_multipliers
-        self._pweights = get_pweights(self.subsystems)
 
         # TODO: account for missing data, varying pweights
         weighted_subsystems = [
@@ -263,12 +286,12 @@ class Subsystem:
         """dict: Strategies to run for this instrument."""
         return self.instrument.strategies
 
+    @property
     def strategy_weights(self):
         """
         Calculate the weight associated with each strategy.
 
-        For now, assign equal weights per level of the hierarchy.
-        Later we can upweight/downweight based on performance and correlations.
+        Currently uses hard-coded weights from config.
 
         Returns
         -------
@@ -276,9 +299,12 @@ class Subsystem:
             Return the weight for each strategy in the format
             {strategy_name: weight}
         """
-        # for strat in self.strategies:
-        #     weight_level_1 = strat.
-        pass
+        weights_dict = {}
+        for strat_name, strat in self.strategies.items():
+            weight = get_weights_from_config(strat, STRATEGY_WEIGHTS)
+            weights_dict[strat_name] = weight
+
+        return weights_dict
 
     @property
     def required_data_fixtures(self):
@@ -322,7 +348,9 @@ class Subsystem:
         Sets the forecast_list and capped_forecasts properties of the Subsystem.
         """
         forecast_list = []
-        for strat in self.strategies.values():
+        fweight_list = []
+
+        for strat_name, strat in self.strategies.items():
             signal_func = strat.signal_func
             input_df = self.price_data.df  # TODO handle passing different data objects to different signals
             forecast = Forecast(signal_func,
@@ -330,7 +358,9 @@ class Subsystem:
                                 self.instrument_id,
                                 f"{self.instrument_id}|{strat.strategy_name}")
             forecast_list.append(forecast)
+            fweight_list.append(self.strategy_weights[strat_name])
 
+        self._fweights = fweight_list
         self._forecast_list = forecast_list
         self._capped_forecasts = [fc.capped_forecast for fc in forecast_list]
 
@@ -343,7 +373,6 @@ class Subsystem:
         Sets the subsystem_position and associated parameters.
         """
         # Combine signals
-        self._fweights = get_fweights(self.capped_forecasts)
         self._combined_forecast = combine_signals(self.capped_forecasts, self.fweights, self.vol_target)  # noqa
 
         # Calc subsystem position
@@ -521,6 +550,53 @@ def combine_signals(signals, weights, vol_target):
     return combined_df
 
 
+def get_weights_from_config(config_object, weights_config):
+    """
+    Get the weight for a given Strategy/Instrument object using the weights in a given config.
+
+    Gets the weight for each level, assigns equal weights to the lowest level,
+    and multiplies these to give the weight for this specific object.
+
+    # TODO: tidy this up.
+
+    Returns
+    -------
+    float:
+        Weight for the given `config_object`
+    """
+    depth = config_object.depth()
+
+    # Get weight for each level in turn
+    weights_by_level = []
+
+    # Level 1
+    level_1_name = config_object.hierarchy_1
+    level_1_weight = weights_config[level_1_name]['weight']
+    weights_by_level.append(level_1_weight)
+
+    # Level 2
+    if depth > 1:
+        level_2_name = config_object.hierarchy_2
+        level_2_weight = weights_config[level_1_name][level_2_name]['weight']
+        weights_by_level.append(level_2_weight)
+
+    # Level 3
+    if depth > 2:
+        level_3_name = config_object.hierarchy_3
+        level_3_weight = weights_config[level_1_name][level_2_name][level_3_name]['weight']
+        weights_by_level.append(level_3_weight)
+
+    if depth > 3:
+        raise NotImplementedError("Weights for depths greater than 3 not implemented yet.")
+
+    # Siblings on lowest level
+    num_siblings = len(config_object.siblings())
+    lowest_level_weight = 1 / num_siblings if num_siblings > 0 else 1
+    weights_by_level.append(lowest_level_weight)
+
+    return np.prod(weights_by_level)
+
+
 ############################
 # Portfolio-specific utils #
 ############################
@@ -542,12 +618,28 @@ def get_pweights(subsystem_list):
     # TODO: As a first pass this just assigns equal weights. Calculate this correctly.
     #   It may make sense to combine the logic for fweights and pweights into a single function
     #   and call that here and in get_fweights.
-    return get_fweights(subsystem_list)
+    return get_equal_weights(subsystem_list)
 
 
 ############################
 # Subsystem-specific utils #
 ############################
+
+def get_equal_weights(input_list):
+    """
+    Get equal weights for a given list.
+
+    Returns
+    -------
+    list(float)
+        A list of len(input_list) with equal weights
+    """
+    num_items = len(input_list)
+    equal_weight = 1 / num_items
+    weights = [equal_weight] * num_items
+
+    return weights
+
 
 def get_fweights(forecast_list):
     """
@@ -565,11 +657,7 @@ def get_fweights(forecast_list):
     """
     # TODO: As a first pass, this currently just assigns equal weights to all forecasts.
     #  These should actually vary depending on correlations.
-    num_forecasts = len(forecast_list)
-    equal_weight = 1 / num_forecasts
-    fweights = [equal_weight] * num_forecasts
-
-    return fweights
+    return get_equal_weights(forecast_list)
 
 
 def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital=None):

@@ -65,11 +65,11 @@ PARAMETERISED_STRATEGIES["BLONG"] = {
     'hierarchy_1': 'bias',
 }
 
-PARAMETERISED_STRATEGIES["BSHORT"] = {
-    'signal_func': short_bias_signal,
-    'raw_signal_func': short_bias_signal,
-    'required_data_fixtures': ['price_df'],
-    'params': {},
-    'strategy_name': "BSHORT",
-    'hierarchy_1': 'bias',
-}
+# PARAMETERISED_STRATEGIES["BSHORT"] = {
+#     'signal_func': short_bias_signal,
+#     'raw_signal_func': short_bias_signal,
+#     'required_data_fixtures': ['price_df'],
+#     'params': {},
+#     'strategy_name': "BSHORT",
+#     'hierarchy_1': 'bias',
+# }
