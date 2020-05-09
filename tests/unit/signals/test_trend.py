@@ -138,7 +138,7 @@ class TestBreakoutSignal:
         assert actual.columns == ['price']
 
     def test_smooth_longer_than_lookback_raises(self, mock_price):
-        """Test that inconsistent smooth and ookback periods raises."""
+        """Test that inconsistent smooth and lookback periods raises."""
         lookback_period = 10
         smooth_period = 20
         expected_msg = "Lookback period 10 must be greater than smooth period 20"

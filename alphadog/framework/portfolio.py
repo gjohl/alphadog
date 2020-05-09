@@ -18,6 +18,7 @@ from alphadog.framework.constants import (
     TRADING_DAYS_PER_YEAR, PORTFOLIO_CCY,
     STARTING_CAPITAL
 )
+from alphadog.framework.signals_config import DATA_FIXTURES
 from alphadog.framework.weights import STRATEGY_WEIGHTS, INSTRUMENT_WEIGHTS
 
 
@@ -199,7 +200,7 @@ class Subsystem:
         self._vol_target = vol_target
 
         # TODO handle loading required data fixtures
-        self.data = {}
+        self.data = self.load_data_fixtures()
         self.price_data = PriceData.from_instrument_id(self.instrument_id)
 
         # TODO - handle the signal's position in the hierarchy
@@ -336,8 +337,9 @@ class Subsystem:
             All data fixtures required for this instrument, in the format:
             {fixture_name: fixture_df}
         """
-        # FIXME: append to self.data
-        raise NotImplementedError()
+        return {fixture: DATA_FIXTURES[fixture](self.instrument_id)
+                for fixture
+                in self.required_data_fixtures}
 
     def run_forecasts(self):
         """
@@ -352,9 +354,9 @@ class Subsystem:
 
         for strat_name, strat in self.strategies.items():
             signal_func = strat.signal_func
-            input_df = self.price_data.df  # TODO handle passing different data objects to different signals
+            params = {fixture: self.data[fixture] for fixture in strat.required_data_fixtures}
             forecast = Forecast(signal_func,
-                                {'price_df': input_df},
+                                params,
                                 self.instrument_id,
                                 f"{self.instrument_id}|{strat.strategy_name}")
             forecast_list.append(forecast)
@@ -603,6 +605,8 @@ def get_weights_from_config(config_object, weights_config):
 
 def get_pweights(subsystem_list):
     """
+    UNUSED
+
     Return a list of portfolio weights for a given subsystem list
 
     Parameters
@@ -627,6 +631,8 @@ def get_pweights(subsystem_list):
 
 def get_equal_weights(input_list):
     """
+    UNUSED
+
     Get equal weights for a given list.
 
     Returns
@@ -643,6 +649,8 @@ def get_equal_weights(input_list):
 
 def get_fweights(forecast_list):
     """
+    UNUSED
+
     Return a list of forecast weights for a given forecast_list.
 
     Parameters

@@ -17,11 +17,24 @@ This config defines the components of the strategies, in the following format.
     }
 }
 
+Data fixtures are denoted by names which correspond to data retrieval functions.
+Currently, these data retrieval functions each take an instrument_id as its argument
+and return a DataFrame of data.
+{fixture_name: retrieval_function}
+
+# TODO:
+In future, this could be made more flexible if the arg is too restrictive,
+instead making required data fixtures a dict of
+{fixture_name: params}
 """
+from alphadog.data.retrieval import PriceData
 from alphadog.signals.trend import momentum_signal, breakout_signal
 from alphadog.signals.bias import long_bias_signal, short_bias_signal
 
 
+##############
+# Strategies #
+##############
 PARAMETERISED_STRATEGIES = {}
 
 # Momentum signals
@@ -73,3 +86,16 @@ PARAMETERISED_STRATEGIES["BLONG"] = {
 #     'strategy_name': "BSHORT",
 #     'hierarchy_1': 'bias',
 # }
+
+
+#################
+# Data Fixtures #
+#################
+
+def get_price_df(instrument_id):
+    return PriceData.from_instrument_id(instrument_id).df
+
+
+DATA_FIXTURES = {
+    'price_df': get_price_df
+}

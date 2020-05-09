@@ -11,14 +11,10 @@ Keep track of ongoing work and priorities.
 
 ## Plan
 
-- Handle passing different data objects from required_data_fixtures
--- Constant dict which maps each fixture name to the data retrieval function.
-   Assume we alway pass the instrument ID to this?
-
-- The rest
-- Flesh out portfolio framework and implement missing functionality
 - Add tests for framework module
 - Add tests for TODO TEST placeholders
+- Add integration test - run everything, check we get something. Use scratch_5 as a starting point.
+- Flesh out portfolio framework and implement missing functionality
 - Add trading_capital csv, Handle reindexing trading_capital, calculating new capital to ffill etc
 - Add discretionary forecasts to data.inputs - date, instrument_id, forecast
 - Add accounting module - see pysystemtrade and quantopian pyfolio and alphalens
@@ -63,6 +59,9 @@ Keep track of ongoing work and priorities.
 - Implement vol_scalar
 - Add some tests and tidy unused/empty modules
 - Calculate weights. Manually assign hierarchy weights in config. 
+- Handle passing different data objects from required_data_fixtures.
+  Constant dict which maps each fixture name to the data retrieval function.
+
 
 
 ## To Read:

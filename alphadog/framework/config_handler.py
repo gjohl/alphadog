@@ -9,6 +9,7 @@ from alphadog.constants import PROJECT_DIR
 from alphadog.framework.signals_config import PARAMETERISED_STRATEGIES
 from alphadog.framework.weights import STRATEGY_WEIGHTS, INSTRUMENT_WEIGHTS
 
+
 class BaseConfiguration:
     """
     Generic class to hold user-defined hierarchies (Instruments, Strategies)
@@ -229,7 +230,6 @@ class Instrument(BaseConfiguration):
     def weight_config(self):
         """dict: The level_1 weights."""
         return INSTRUMENT_WEIGHTS
-
 
     @property
     def identifier(self):
