@@ -1,4 +1,4 @@
-def test_paramaterised_strategies():
+def test_parameterised_strategies():
     # TODO TEST
     pass
 

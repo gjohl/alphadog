@@ -12,7 +12,7 @@ from alphadog.framework.weights import STRATEGY_WEIGHTS, INSTRUMENT_WEIGHTS
 
 class BaseConfiguration:
     """
-    Generic class to hold user-defined hierarchies (Instruments, Strategies)
+    Generic class to hold user-defined hierarchies (Instruments, Strategies).
     """
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
