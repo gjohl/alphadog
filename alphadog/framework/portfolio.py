@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from alphadog.internals.analytics import cross_sectional_mean
+from alphadog.internals.exceptions import InputDataError
 from alphadog.internals.fx import get_fx
 from alphadog.data.retrieval import PriceData
 from alphadog.framework.config_handler import (
@@ -391,7 +392,8 @@ class Forecast:
     Takes generic params which the signal function requires to run. This does not have to be
     a price timeseries; could be fundamental data, machine learned features/parameters.
 
-    The signal function can then take this and return a timeseries of forecasts.
+    The signal function can then take this and return a timeseries of raw forecasts.
+    These are then scaled and capped to have normalised aboslute mean, min and max values.
     """
     def __init__(self, signal_func, params, instrument_id='id', name='forecast'):
         """
@@ -478,6 +480,8 @@ class Forecast:
         Populates values for the raw, scaled and capped forecasts.
         """
         self._raw_forecast = self.signal_func(**self.params)
+        if self.raw_forecast.empty:
+            raise InputDataError(f"{self.name} has an empty raw forecast. Check inputs.")
         self._forecast_scalar = AVG_FORECAST / self.raw_forecast.abs().mean()
         self._scaled_forecast = self.raw_forecast * self.forecast_scalar
 
@@ -680,7 +684,7 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
     ----------
     price_df: pd.DataFrame
         Daily close price of the instrument being traded. This assumes equities only.
-    fx_rate: pd.DataFrame
+    fx_rate: pd.DataFrame or float
         Daily FX rate to GBP
     vol_target: float
         The target annualised percentage volatility.
