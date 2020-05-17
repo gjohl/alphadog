@@ -73,4 +73,4 @@ Keep track of ongoing work and priorities.
 ## Future modules:
 - accounting - maybe roll this into portfolio_management
 - execution - once trading is automated
-- risk
+- risk - submodule of analytics?

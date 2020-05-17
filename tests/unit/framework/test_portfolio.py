@@ -11,9 +11,47 @@ def mock_signal(df, multiplier):
     return df * multiplier
 
 
-def test_portfolio():
+class TestPortfolio:
     # TODO TEST
-    pass
+    def test_instantiation_with_config(self):
+        """Test a Portfolio instantiates with an input config."""
+        # TODO TEST
+        # instument_config
+        # vol_target
+        pass
+
+    def test_instantiation_default_config(self):
+        """Test a Portfolio instantiates with a default config."""
+        # TODO TEST
+        pass
+
+    def test_instantiation_with_input_vol_target(self):
+        """Test a Portfolio instantiates with an input vol_target."""
+        # TODO TEST
+        pass
+
+    def test_properties(self):
+        """Test the properties of the Portfolio are present."""
+        # TODO TEST
+        # traded_instruments
+        # instruments
+        # instrument_weights
+        pass
+
+    def test_subsystem_lists(self):
+        """Test the list of Subsystems in the Portfolio."""
+        # TODO TEST
+        # subsystems
+        # pweights
+        # diversification mults
+        pass
+
+    def test_combined_position(self):
+        """Test the combined subsystems and final target position."""
+        # TODO TEST
+        # target_position
+        pass
+
 
 
 class TestSubsystem:
@@ -54,7 +92,7 @@ class TestSubsystem:
         assert hasattr(actual, 'load_data_fixtures')
 
     def test_forecast_lists(self, mock_instrument):
-        """Test the list of forecasts per strategy in the Subsystem."""
+        """Test the list of Forecasts per strategy in the Subsystem."""
         actual = Subsystem(mock_instrument)
         expected_num_signals = 13
         assert len(actual.forecast_list) == expected_num_signals

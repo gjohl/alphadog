@@ -701,10 +701,11 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
     """
     # Characteristics of the instrument
     block_value = price_df.copy()  # TODO: this works for equities only
-    price_vol = price_df.ewm(span=VOL_SPAN).std()
+    price_vol = price_df.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
     instrument_currency_vol = block_value * price_vol
     instrument_value_vol = instrument_currency_vol * fx_rate  # TODO: check conversion is the right way around
 
+    # TODO: maybe split this into two functions?
     # Characteristics of the portfolio
     cash_vol_target_annualised = vol_target * trading_capital
     cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
