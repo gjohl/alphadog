@@ -10,10 +10,8 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-
-- Add tests for framework module
+- Add tests for framework module: vol_scalar, get_div_mult, combine_signals, fix Subsystem test, add Portfolio tests
 - Add tests for TODO TEST placeholders
-- Add integration test - run everything, check we get something. Use scratch_5 as a starting point.
 - Flesh out portfolio framework and implement missing functionality
 - Add trading_capital csv, Handle reindexing trading_capital, calculating new capital to ffill etc
 - Add discretionary forecasts to data.inputs - date, instrument_id, forecast
@@ -61,10 +59,12 @@ Keep track of ongoing work and priorities.
 - Calculate weights. Manually assign hierarchy weights in config. 
 - Handle passing different data objects from required_data_fixtures.
   Constant dict which maps each fixture name to the data retrieval function.
+- Add integration test - run everything, check we get something. Use scratch_5 as a starting point.
 
 
 
 ## To Read:
+- Algorithmic Trading, Ernie Chan
 - Kelly Criterion
 - Perry Kaufman signals book
 - Leveraged trading

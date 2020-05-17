@@ -175,12 +175,12 @@ class Portfolio:
 
 class Subsystem:
     """
-    Takes an instrument configuration from an Instrument object and calculates
-    all Forecast objects and related parameters for that instrument.
+    Takes an Instrument object configuration and calculates all Forecast objects and
+    related parameters for that instrument.
 
     Combine forecasts and handle position sizing to give a subsystem position.
 
-    Contain/calculate:
+    Calculate:
     - forecasts
     - f_weights
     - vol scalar - price, fx, vol_target, trading_capital
@@ -200,11 +200,9 @@ class Subsystem:
         self._instrument = instrument
         self._vol_target = vol_target
 
-        # TODO handle loading required data fixtures
         self.data = self.load_data_fixtures()
         self.price_data = PriceData.from_instrument_id(self.instrument_id)
 
-        # TODO - handle the signal's position in the hierarchy
         self._forecast_list = None
         self._capped_forecasts = None
         self._fweights = None
@@ -712,5 +710,7 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
     cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
 
     vol_scalar = cash_vol_target_daily / instrument_value_vol
+
+    # TODO: rename column
 
     return vol_scalar

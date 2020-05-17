@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from alphadog.framework.portfolio import (
-    get_vol_scalar, Forecast
+    get_vol_scalar, Forecast, Subsystem
 )
 from alphadog.internals.exceptions import InputDataError
 
@@ -16,9 +16,75 @@ def test_portfolio():
     pass
 
 
-def test_subsystem():
-    # TODO TEST
-    pass
+class TestSubsystem:
+
+    def test_instantiation(self, mock_instrument):
+        """Test a Subsystem instantiates with default vol_target."""
+        actual = Subsystem(mock_instrument)
+        assert actual.instrument_id == "FTSE100"
+        assert actual.vol_target == 10
+
+    @pytest.mark.parametrize('input_vol', [5, 10, 50])
+    def test_instantiation_with_vol_target(self, mock_instrument, input_vol):
+        """Test a Subsystem instantiates with input vol_target."""
+        actual = Subsystem(mock_instrument, vol_target=input_vol)
+        assert actual.instrument_id == "FTSE100"
+        assert actual.vol_target == input_vol
+
+    def test_properties(self, mock_instrument):
+        """Test the properties of the Subsystem are present."""
+        actual = Subsystem(mock_instrument)
+        expected_strategies = ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6",
+                               "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
+        assert actual.currency == 'GBP'
+        assert actual.instrument_id == 'FTSE100'
+        assert actual.is_traded is True
+        assert list(actual.strategies.keys()) == expected_strategies
+        assert list(actual.strategy_weights.keys()) == expected_strategies
+        assert sum(actual.strategy_weights.values()) == 1.
+        assert actual.fx_rate == 1.
+        assert actual.trading_capital == 10000.
+
+    def test_data_fixtures(self, mock_instrument):
+        """Test the data fixtures of the Subsystem."""
+        actual = Subsystem(mock_instrument)
+        assert actual.required_data_fixtures == ['price_df']
+        assert list(actual.data.keys()) == ['price_df']
+        assert not actual.data['price_df'].dropna().empty
+        assert hasattr(actual, 'load_data_fixtures')
+
+    def test_forecast_lists(self, mock_instrument):
+        """Test the list of forecasts per strategy in the Subsystem."""
+        actual = Subsystem(mock_instrument)
+        expected_num_signals = 13
+        assert len(actual.forecast_list) == expected_num_signals
+        assert len(actual.capped_forecasts) == expected_num_signals
+        assert len(actual.fweights) == expected_num_signals
+
+        assert all([not fc.raw_forecast.dropna().empty for fc in actual.forecast_list])
+        assert all([not capped_fc.dropna().empty for capped_fc in actual.capped_forecasts])
+        assert all([fw > 0 for fw in actual.fweights])
+        assert sum(actual.fweights) == 1.
+
+    def test_position(self, mock_instrument):
+        """Test the combined forecasts and final position."""
+        # TODO TEST
+        actual = Subsystem(mock_instrument)
+        expected_strategies = ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6",
+                               "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
+        expected_forecast_names = set([f"FTSE100|{strat}" for strat in expected_strategies])
+
+        assert actual.fx_rate == 1.
+
+        assert set(actual.combined_forecast.columns) == expected_forecast_names
+        assert not actual.combined_forecast.dropna().empty  # TODO
+
+        set(actual.vol_scalar.columns) == {'vol_scalar'}  # TODO
+        assert not actual.vol_scalar.dropna().empty
+
+        assert actual.subsystem_position.shape[1] == 1  # TODO
+        set(actual.subsystem_position.columns) == {'FTSE100'}  # TODO
+        assert not actual.subsystem_position.dropna().empty  # TODO
 
 
 class TestForecast:

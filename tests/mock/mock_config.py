@@ -1,5 +1,7 @@
 import pytest
 
+from alphadog.framework.config_handler import Instrument
+
 
 instrument_config = {
     "FTSE100": {
@@ -57,6 +59,11 @@ def mock_instrument_config():
 @pytest.fixture
 def mock_instrument_dict():
     return instrument_config['FTSE100']
+
+
+@pytest.fixture
+def mock_instrument():
+    return Instrument.from_config(instrument_config['FTSE100'])
 
 
 def test_func1():
