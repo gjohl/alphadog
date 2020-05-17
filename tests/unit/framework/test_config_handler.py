@@ -62,7 +62,7 @@ class TestStrategy:
 
 
 class TestInstrument:
-    # TODO TEST
+
     def test_init(self, mock_instrument_dict):
         instrument = Instrument(**mock_instrument_dict)
         assert instrument.identifier == 'FTSE100'
