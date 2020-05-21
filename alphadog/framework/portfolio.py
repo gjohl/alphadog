@@ -699,19 +699,102 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
         The volatility scalar for a given instrument.
         This is the number of blocks of the given instrument required to hit the vol target.
     """
-    # Characteristics of the instrument
-    block_value = price_df.copy()  # TODO: this works for equities only
-    price_vol = price_df.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
-    instrument_currency_vol = block_value * price_vol
-    instrument_value_vol = instrument_currency_vol * fx_rate  # TODO: check conversion is the right way around
-
-    # TODO: maybe split this into two functions?
-    # Characteristics of the portfolio
-    cash_vol_target_annualised = vol_target * trading_capital
-    cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
-
-    vol_scalar = cash_vol_target_daily / instrument_value_vol
+    instrument_value_vol = get_instrument_value_volatility(price_df, fx_rate)
+    cash_vol_target_daily = get_cash_vol_target_daily(vol_target, trading_capital)
+    vol_scalar = cash_vol_target_daily / instrument_value_vol  # TODO: check pandas division
 
     # TODO: rename column
 
     return vol_scalar
+
+
+def get_instrument_value_volatility(price_df, fx_rate, asset_class='equity'):
+    """
+    Get the instrument value volatility for an instrument.
+
+    Instrument value volatility gives the vol contribution per block of the instrument
+    in the portfolio currency.
+
+    Parameters
+    ----------
+    price_df: pd.DataFrame
+        Daily close price of the instrument being traded. This assumes equities only.
+    fx_rate: pd.DataFrame or float
+        Daily FX rate to GBP
+    asset_class: str
+        Asset class to calculated the block value for.
+        Currently only equities are supported.
+
+    Returns
+    -------
+    pd.DataFrame
+        Time series of the instrument's vol contribution per block.
+
+    Raises
+    ------
+    NotImplementedError
+         If using an asset_class that is not equity.
+    """
+    # TODO: this currently only works for equities
+    if asset_class == 'equity':
+        block_value = price_df.copy()  # TODO: this works for equities only
+    else:
+        raise NotImplementedError(f"Block value calculations for {asset_class} "
+                                  f"are not yet implemented.")
+
+    # Sanitise inputs
+    assert price_df.shape[1] == 1
+    assert fx_rate.shape[1] == 1
+    fx_reindexed = fx_rate.reindex(price_df.index)
+    fx_reindexed.columns = price_df.columns
+
+    price_vol = price_df.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
+    instrument_currency_vol = block_value * price_vol
+    instrument_value_vol = instrument_currency_vol * fx_reindexed
+    instrument_value_vol.columns = ['instrument_value_volatility']
+
+    # TODO ffill?
+
+    return instrument_value_vol
+
+
+def get_cash_vol_target_daily(vol_target, trading_capital):
+    """
+    Convert the annualised percentage vol target to an daily cash amount.
+
+    Parameters
+    ----------
+    vol_target: float
+        The target annualised percentage volatility.
+    trading_capital: pd.DataFrame or float
+        Timeseries of capital available to invest. GBP amount.
+        TODO: This is currently a scalar starting amount which does not reflect
+         rolling up/ rolling down losses.
+         The current implementation is equivalent to adding capital following losses and
+         removing gains, so this does not reflect any compounding
+
+    Returns
+    -------
+    type(trading_capital)
+        The daily cash vol target.
+        Returns the same type as the trading capital input.
+        If this is a DataFrame this is the daily cash vol target on a given day.
+    """
+    # Sanitise inputs
+    # TODO generalise these as data quality checks and just call `check_non_negative`
+
+    # FIXME: make this work with trading_capital DataFrame
+    if vol_target < 0:
+        raise InputDataError(f"Input vol_target cannot be negative. Got {vol_target}")
+    if vol_target < 1:
+        raise InputDataError(f"Input vol_target should be a percentage. Got {vol_target} which "
+                             f"might be a decimal")
+    if trading_capital < 0:
+        raise InputDataError(f"Input trading_capital cannot be negative. Got {trading_capital}")
+
+    cash_vol_target_annualised = (vol_target / 100.) * trading_capital
+    cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
+
+    return cash_vol_target_daily
+
+

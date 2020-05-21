@@ -40,3 +40,13 @@ def mock_ohlcv():
         index=index,
         dtype=float)
     return ohlcv_df
+
+
+@pytest.fixture
+def mock_fx_rate():
+    return pd.DataFrame(
+        data=[0.784, 0.7986, 0.7918, 0.7852, 0.7821, 0.7851, 0.7813, 0.7841, 0.7782, 0.7767,
+              0.7769, 0.776, 0.7702, 0.778, 0.7757, 0.7717, 0.7644, 0.7621, 0.7571, 0.7599],
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+        columns=['MOCKFXRATE']
+    )
