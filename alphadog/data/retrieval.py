@@ -2,7 +2,7 @@
 Functionality to get normalised data.
 """
 from alphadog.data.data_quality import (
-    staleness, check_data, check_price_data
+    staleness, check_nonempty_dataframe, check_price_data
 )
 from alphadog.data.yfinance_data import load_yfinance_data
 
@@ -25,7 +25,7 @@ class BaseData:
         """
         self.df = input_df
         self.name = name
-        check_data(self.df, self.name)
+        check_nonempty_dataframe(self.df, self.name)
         self.staleness = staleness(input_df)
 
     def __repr__(self):

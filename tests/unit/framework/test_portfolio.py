@@ -15,7 +15,7 @@ def mock_signal(df, multiplier):
 
 @pytest.fixture
 def expected_instrument_value_vol():
-    return pd.DataFrame(
+    df = pd.DataFrame(
         data=[np.nan, 28.99137802864845, 41.97760597014876, 55.435884849984355, 69.39249225768688,
               83.84757224998215, 98.79218919575786, 114.2132548210345, 130.09536197467733,
               146.42160539439644, 163.17401118675886, 180.33379609578282, 197.8815456574169,
@@ -24,6 +24,7 @@ def expected_instrument_value_vol():
         index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
         columns=['instrument_value_volatility']
     )
+    return df.iloc[:, 0]
 
 
 class TestPortfolio:
@@ -299,37 +300,95 @@ def test_get_weights_from_config():
 
 
 class TestGetVolScalar:
-    # TODO TEST
+
     def test_scalar_fxrate_and_trading_capital(self, mock_price):
         """Test success when fx_rate and trading_capital inputs are scalars."""
-        # TODO TEST
         fx_rate = 1.
         vol_target = 10.
         trading_capital = 10000.
         actual = get_vol_scalar(mock_price, fx_rate, vol_target, trading_capital)
-        expected = 10
-        assert actual == expected
-        pass
+        expected = pd.DataFrame(
+            data=[np.nan, 2.172855625304263, 1.5006591581155853, 1.136341180542895,
+                  0.9077938662434062, 0.7512928179609233, 0.6376423009520289, 0.5515478823677624,
+                  0.4842146397742666, 0.4302239322208797, 0.3860546074507667, 0.34931931894458884,
+                  0.31834236298078, 0.2919131242251744, 0.2691353970373339, 0.249331719420749,
+                  0.2319806253413172, 0.21667431508699794, 0.2030893905135734,
+                  0.19096618095084583],
+            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+            columns=['vol_scalar']
+        )
+        pd.testing.assert_frame_equal(actual, expected)
 
-    def test_df_fxrate_and_trading_capital(self):
+    def test_df_fxrate_and_trading_capital(self, mock_price, mock_fx_rate, mock_trading_capital):
         """Test success when fx_rate and trading_capital inputs are DataFrames."""
-        # TODO TEST
-        pass
+        vol_target = 10.
+        actual = get_vol_scalar(mock_price, mock_fx_rate, vol_target, mock_trading_capital)
+        expected = pd.DataFrame(
+            data=[np.nan, 2.992914084441134, 2.1795378022643632, 1.3024797026090238,
+                  1.0446419634561637, 0.8133981598099412, 0.9793558954850053, 0.9144397998700308,
+                  0.9333358515309687, 1.1078252406872144, np.nan, np.nan, np.nan, np.nan, np.nan,
+                  np.nan, np.nan, np.nan, np.nan, np.nan],
+            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+            columns=['vol_scalar']
+        )
+        pd.testing.assert_frame_equal(actual, expected)
 
-    def test_df_fxrate_scalar_trading_capital(self):
+    def test_df_fxrate_scalar_trading_capital(self, mock_price, mock_fx_rate):
         """Test success when fx_rate is a DataFrame and trading_capital is a scalar."""
-        # TODO TEST
-        pass
+        vol_target = 10.
+        trading_capital = 10000
+        actual = get_vol_scalar(mock_price, mock_fx_rate, vol_target, trading_capital)
+        expected = pd.DataFrame(
+            data=[np.nan, 2.720830985855576, 1.895250262838577, 1.447199669565582,
+                  1.1607132927290706, 0.9569390115411073, 0.8161299129041711, 0.7034152306692544,
+                  0.6222239010206458, 0.5539126203436072, 0.4969167298890033, 0.45015376152653197,
+                  0.4133242832780837, 0.3752096712405841, 0.34695809853981424, 0.3230941031757794,
+                  0.3034806715611162, 0.28431218355464893, 0.2682464542511866, 0.2513043570875718],
+            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+            columns=['vol_scalar']
+        )
+        pd.testing.assert_frame_equal(actual, expected)
 
-    def test_scalar_fxrate_df_trading_capital(self):
+    def test_scalar_fxrate_df_trading_capital(self, mock_price, mock_trading_capital):
         """Test success when trading_capital is a DataFrame."""
-        # TODO TEST
-        pass
+        vol_target = 10.
+        fx_rate = 1.
+        actual = get_vol_scalar(mock_price, fx_rate, vol_target, mock_trading_capital)
+        expected = pd.DataFrame(
+            data=[np.nan, 2.3901411878346894, 1.7257580318329229, 1.0227070624886054,
+                  0.8170144796190656, 0.6385988952667848, 0.7651707611424347, 0.7170122470780911,
+                  0.7263219596613999, 0.8604478644417594, np.nan, np.nan, np.nan, np.nan, np.nan,
+                  np.nan, np.nan, np.nan, np.nan, np.nan],
+            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+            columns=['vol_scalar']
+        )
+        pd.testing.assert_frame_equal(actual, expected)
 
-    def test_empty_price_df(self):
+    def test_empty_price_df_raises(self, mock_price, mock_fx_rate, mock_trading_capital):
         """Test an error is raised when price is empty."""
-        # TODO TEST
-        pass
+        vol_target = 10.
+        empty_price = mock_price.head(0)
+        with pytest.raises(InputDataError):
+            get_vol_scalar(empty_price, mock_fx_rate, vol_target, mock_trading_capital)
+
+    def test_empty_fxrate_df_raises(self, mock_price, mock_fx_rate, mock_trading_capital):
+        """Test an error is raised when fx_rate is empty."""
+        vol_target = 10.
+        empty_fx = mock_fx_rate.head(0)
+        with pytest.raises(InputDataError):
+            get_vol_scalar(mock_price, empty_fx, vol_target, mock_trading_capital)
+
+    def test_negative_vol_target_raises(self, mock_price, mock_fx_rate, mock_trading_capital):
+        vol_target = -69
+        with pytest.raises(InputDataError):
+            get_vol_scalar(mock_price, mock_fx_rate, vol_target, mock_trading_capital)
+
+    def test_empty_trading_capital_df_raises(self, mock_price, mock_fx_rate, mock_trading_capital):
+        """Test an error is raised when trading_capital is empty."""
+        vol_target = 10.
+        empty_trading_capital = mock_trading_capital.head(0)
+        with pytest.raises(InputDataError):
+            get_vol_scalar(mock_price, mock_fx_rate, vol_target, empty_trading_capital)
 
 
 class TestGetInstrumentValueVolatility:
@@ -338,29 +397,49 @@ class TestGetInstrumentValueVolatility:
     def test_scalar_fx_rate(self, mock_price, expected_instrument_value_vol, fx_rate):
         actual = get_instrument_value_volatility(mock_price, fx_rate)
         expected = expected_instrument_value_vol * fx_rate
-        pd.testing.assert_frame_equal(actual, expected)
+        pd.testing.assert_series_equal(actual, expected)
 
     def test_dataframe_fx_rate(self, mock_price, mock_fx_rate, expected_instrument_value_vol):
         actual = get_instrument_value_volatility(mock_price, mock_fx_rate)
-        expected = expected_instrument_value_vol * mock_fx_rate.values
-        pd.testing.assert_frame_equal(actual, expected)
+        expected = expected_instrument_value_vol * mock_fx_rate.values.flatten()
+        pd.testing.assert_series_equal(actual, expected)
 
-    @pytest.mark.parametrize('indices',
-                             [range(10), range(10, 20), range(5, 17), [4]])
-    def test_dataframe_fx_rate_shorter_than_price_series(self, mock_price, mock_fx_rate,
-                                                         expected_instrument_value_vol,
-                                                         indices):
+    @pytest.mark.parametrize(
+        'indices, expected_values', [
+            [range(10),
+             [np.nan, 23.15251449367865, 33.23786840716379, 43.52825678420771, 54.27186819473691,
+              65.82872897346098, 77.1863374186456, 89.55461310517315, 101.2402106886939,
+              113.72566090982771, 126.7372544887556, 140.0652594275945, 153.69459651211568,
+              167.60980226878397, 181.79511714045307, np.nan, np.nan, np.nan, np.nan, np.nan]],
+            [range(10, 20), [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+                             np.nan, np.nan, 126.76988929099296, 139.93902577032748,
+                             152.40836646534248, 167.8903388246607, 181.56105621971088,
+                             194.9713046932313, 207.57196335050682, 221.5665823647787,
+                             234.8365759790562, 250.66847055468963]],
+            [range(5, 17), [np.nan, np.nan, np.nan, np.nan, np.nan, 65.82872897346098, 77.1863374186456,
+                            89.55461310517315, 101.2402106886939, 113.72566090982771,
+                            126.76988929099296, 139.93902577032748, 152.40836646534248,
+                            167.8903388246607, 181.56105621971088, 194.9713046932313,
+                            207.57196335050682, 222.2352651353324, 237.10088321013149,
+                            252.15288707988518]],
+            [[4], [np.nan, np.nan, np.nan, np.nan, 54.27186819473691, 65.57718625671104,
+                   77.26537117000223, 89.32618659553108, 101.74758260039515, 114.51633757895746,
+                   np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]]
+        ]
+    )
+    def test_dataframe_fx_rate_shorter_than_price_series(
+            self, mock_price, mock_fx_rate, indices, expected_values
+    ):
         """Test when the fx_rate series is shorter than the price_df time series."""
-
         fx_rate = mock_fx_rate.iloc[indices]
         actual = get_instrument_value_volatility(mock_price, fx_rate)
-
-        expected_all_values = expected_instrument_value_vol * mock_fx_rate.values
-        expected = expected_instrument_value_vol.copy()
-        expected.loc[:, 'instrument_value_volatility'] = np.nan
-        expected.iloc[indices] = expected_all_values.iloc[indices]
-
-        pd.testing.assert_frame_equal(actual, expected)
+        expected = pd.DataFrame(
+            data=expected_values,
+            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+            columns=['instrument_value_volatility']
+        )
+        expected = expected.iloc[:, 0]
+        pd.testing.assert_series_equal(actual, expected)
 
     @pytest.mark.parametrize(
         'indices, expected_timestamps, expected_values', [
@@ -392,8 +471,18 @@ class TestGetInstrumentValueVolatility:
             index=pd.DatetimeIndex(expected_timestamps, name='timestamp'),
             columns=['instrument_value_volatility']
         )
+        expected = expected.iloc[:, 0]
+        pd.testing.assert_series_equal(actual, expected)
 
-        pd.testing.assert_frame_equal(actual, expected)
+    def test_empty_price_raises(self, mock_price, mock_fx_rate):
+        empty_price = mock_price.head(0)
+        with pytest.raises(InputDataError):
+            get_instrument_value_volatility(empty_price, mock_fx_rate)
+
+    def test_empty_df_fxrate_raises(self, mock_price, mock_fx_rate):
+        empty_fx = mock_fx_rate.head(0)
+        with pytest.raises(InputDataError):
+            get_instrument_value_volatility(mock_price, empty_fx)
 
     def test_unsupported_asset_class_raises(self, mock_price):
         asset_class = "SNAKEOIL"
@@ -411,32 +500,35 @@ class TestGetCashVolTargetDaily:
         expected = 10000 * (10/100) / np.sqrt(252)
         assert actual == expected
 
-    def test_dataframe_trading_capital(self):
+    def test_dataframe_trading_capital(self, mock_trading_capital):
         vol_target = 20
-        # TODO move to mock directory
-        trading_capital = pd.DataFrame(
-            data=[10000, 11000, 11500, 9000, 9000, 8500, 12000, 13000, 15000, 20000],
-            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=10), name='timestamp'),
-            columns=['trading_capital']
-        )
-        actual = get_cash_vol_target_daily(vol_target, trading_capital)
-        expected = 0.2 / np.sqrt(252) * trading_capital
-        pd.testing.assert_frame_equal(actual, expected)
+        actual = get_cash_vol_target_daily(vol_target, mock_trading_capital)
+        expected = 0.2 / np.sqrt(252) * mock_trading_capital
+        expected.columns = ['cash_vol_target_daily']
+        expected = expected.iloc[:, 0]
+        pd.testing.assert_series_equal(actual, expected)
+
+    def test_empty_df_trading_capital_raises(self, mock_trading_capital):
+        vol_target = 20
+        empty_trading_capital = mock_trading_capital.head(0)
+        with pytest.raises(InputDataError):
+            get_cash_vol_target_daily(vol_target, empty_trading_capital)
+
+    def test_negative_trading_capital_raises(self):
+        trading_capital = -10000
+        expected_msg = "Input trading_capital is below the threshold value 0. Got -10000"
+        with pytest.raises(InputDataError, match=expected_msg):
+            get_cash_vol_target_daily(10, trading_capital)
 
     def test_negative_vol_target_raises(self):
         vol_target = -10
-        expected_msg = "Input vol_target cannot be negative. Got -10"
+        expected_msg = "Input vol_target is below the threshold value 1. Got -10"
         with pytest.raises(InputDataError, match=expected_msg):
             get_cash_vol_target_daily(vol_target, 10000)
 
     def test_decimal_vol_target_raises(self):
         vol_target = 0.25
-        expected_msg = "Input vol_target should be a percentage. Got 0.25 which might be a decimal"
+        expected_msg = "Input vol_target is below the threshold value 1. Got 0.25"
         with pytest.raises(InputDataError, match=expected_msg):
             get_cash_vol_target_daily(vol_target, 10000)
 
-    def test_negative_trading_capital_raises(self):
-        trading_capital = -10000
-        expected_msg = "Input trading_capital cannot be negative. Got -10000"
-        with pytest.raises(InputDataError, match=expected_msg):
-            get_cash_vol_target_daily(10, trading_capital)

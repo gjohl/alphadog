@@ -9,6 +9,9 @@ import pandas as pd
 from alphadog.internals.analytics import cross_sectional_mean
 from alphadog.internals.exceptions import InputDataError
 from alphadog.internals.fx import get_fx
+from alphadog.data.data_quality import (
+    check_scalar_is_above_min_threshold, check_nonempty_dataframe
+)
 from alphadog.data.retrieval import PriceData
 from alphadog.framework.config_handler import (
     load_default_instrument_config, Instrument
@@ -17,7 +20,7 @@ from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET, VOL_SPAN,
     TRADING_DAYS_PER_YEAR, PORTFOLIO_CCY,
-    STARTING_CAPITAL
+    STARTING_CAPITAL, MAX_FFILL
 )
 from alphadog.framework.signals_config import DATA_FIXTURES
 from alphadog.framework.weights import STRATEGY_WEIGHTS, INSTRUMENT_WEIGHTS
@@ -670,7 +673,7 @@ def get_fweights(forecast_list):
     return get_equal_weights(forecast_list)
 
 
-def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital=None):
+def get_vol_scalar(price_df, fx_rate, vol_target, trading_capital):
     """
     Calculate the volatility scalar for a given instrument.
 
@@ -695,15 +698,15 @@ def get_vol_scalar(price_df=None, fx_rate=None, vol_target=None, trading_capital
 
     Returns
     -------
-    vol_scalar: pd.Series
+    vol_scalar: pd.DataFrame
         The volatility scalar for a given instrument.
         This is the number of blocks of the given instrument required to hit the vol target.
     """
     instrument_value_vol = get_instrument_value_volatility(price_df, fx_rate)
     cash_vol_target_daily = get_cash_vol_target_daily(vol_target, trading_capital)
-    vol_scalar = cash_vol_target_daily / instrument_value_vol  # TODO: check pandas division
-
-    # TODO: rename column
+    vol_scalar = cash_vol_target_daily / instrument_value_vol
+    vol_scalar = pd.DataFrame(vol_scalar)
+    vol_scalar.columns = ['vol_scalar']
 
     return vol_scalar
 
@@ -727,7 +730,7 @@ def get_instrument_value_volatility(price_df, fx_rate, asset_class='equity'):
 
     Returns
     -------
-    pd.DataFrame
+    pd.Series
         Time series of the instrument's vol contribution per block.
 
     Raises
@@ -737,23 +740,29 @@ def get_instrument_value_volatility(price_df, fx_rate, asset_class='equity'):
     """
     # TODO: this currently only works for equities
     if asset_class == 'equity':
-        block_value = price_df.copy()  # TODO: this works for equities only
+        block_value = price_df.copy()
     else:
         raise NotImplementedError(f"Block value calculations for {asset_class} "
                                   f"are not yet implemented.")
 
     # Sanitise inputs
-    assert price_df.shape[1] == 1
-    assert fx_rate.shape[1] == 1
-    fx_reindexed = fx_rate.reindex(price_df.index)
-    fx_reindexed.columns = price_df.columns
+    assert block_value.shape[1] == 1
+    check_nonempty_dataframe(block_value, 'block_value')
+    if isinstance(fx_rate, pd.DataFrame):
+        check_nonempty_dataframe(fx_rate, 'fx_rate')
+        assert fx_rate.shape[1] == 1
+        fx_reindexed = fx_rate.reindex(price_df.index)
+        fx_reindexed.columns = price_df.columns
+        fx_reindexed = fx_reindexed.ffill(limit=MAX_FFILL)  # ffill fx so we still have a signal
+    elif isinstance(fx_rate, (int, float)):
+        check_scalar_is_above_min_threshold(fx_rate, 'fx_rate', 0)
+        fx_reindexed = fx_rate
 
-    price_vol = price_df.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
+    price_vol = block_value.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
     instrument_currency_vol = block_value * price_vol
     instrument_value_vol = instrument_currency_vol * fx_reindexed
     instrument_value_vol.columns = ['instrument_value_volatility']
-
-    # TODO ffill?
+    instrument_value_vol = instrument_value_vol.iloc[:, 0]
 
     return instrument_value_vol
 
@@ -775,25 +784,25 @@ def get_cash_vol_target_daily(vol_target, trading_capital):
 
     Returns
     -------
-    type(trading_capital)
+    cash_vol_target_daily: float, pd.Series
         The daily cash vol target.
-        Returns the same type as the trading capital input.
-        If this is a DataFrame this is the daily cash vol target on a given day.
+        Returns a float if trading_capital is a scalar or a pd.Series if trading_capital
+        is a timeseries
     """
     # Sanitise inputs
-    # TODO generalise these as data quality checks and just call `check_non_negative`
-
-    # FIXME: make this work with trading_capital DataFrame
-    if vol_target < 0:
-        raise InputDataError(f"Input vol_target cannot be negative. Got {vol_target}")
-    if vol_target < 1:
-        raise InputDataError(f"Input vol_target should be a percentage. Got {vol_target} which "
-                             f"might be a decimal")
-    if trading_capital < 0:
-        raise InputDataError(f"Input trading_capital cannot be negative. Got {trading_capital}")
+    check_scalar_is_above_min_threshold(vol_target, 'vol_target', 1)  # pct not decimal
+    if isinstance(trading_capital, (int, float)):
+        check_scalar_is_above_min_threshold(trading_capital, 'trading_capital', 0)
+    else:
+        check_nonempty_dataframe(trading_capital, 'trading_capital')
 
     cash_vol_target_annualised = (vol_target / 100.) * trading_capital
     cash_vol_target_daily = cash_vol_target_annualised / np.sqrt(TRADING_DAYS_PER_YEAR)
+
+    if isinstance(cash_vol_target_daily, pd.DataFrame):
+        assert cash_vol_target_daily.shape[1] == 1
+        cash_vol_target_daily.columns = ['cash_vol_target_daily']
+        cash_vol_target_daily = cash_vol_target_daily.iloc[:, 0]
 
     return cash_vol_target_daily
 

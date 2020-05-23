@@ -50,3 +50,12 @@ def mock_fx_rate():
         index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
         columns=['MOCKFXRATE']
     )
+
+
+@pytest.fixture
+def mock_trading_capital():
+    return pd.DataFrame(
+        data=[10000, 11000, 11500, 9000, 9000, 8500, 12000, 13000, 15000, 20000],
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=10), name='timestamp'),
+        columns=['trading_capital']
+    )

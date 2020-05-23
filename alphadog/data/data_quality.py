@@ -31,7 +31,7 @@ def staleness(input_df):
     return staleness_days
 
 
-def check_data(input_df, name):
+def check_nonempty_dataframe(input_df, name):
     """
     Run data quality checks for generic input data.
 
@@ -50,6 +50,33 @@ def check_data(input_df, name):
         raise InputDataError(f"No data for {name}")
 
     return True
+
+
+def check_scalar_is_above_min_threshold(input_scalar, input_name, threshold):
+    """
+    Check if a scalar is above a given threshold value. Raise if it is below.
+
+    Parameters
+    ----------
+    input_scalar: int, float
+        Variable to check.
+    input_name: str
+        Name of variable. Used for logging.
+    threshold: int, float
+        Threshold value that the input_scalar must be greater than or equal to.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    InputDataError
+        Raises if input_scalar is below the given threshold
+    """
+    if input_scalar < threshold:
+        raise InputDataError(f"Input {input_name} is below the threshold value {threshold}."
+                             f" Got {input_scalar}")
 
 
 ########################

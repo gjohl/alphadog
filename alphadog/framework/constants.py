@@ -11,3 +11,5 @@ VOL_TARGET = 10  # TODO - revisit this value
 VOL_SPAN = 25
 
 TRADING_DAYS_PER_YEAR = 252
+
+MAX_FFILL = 5
