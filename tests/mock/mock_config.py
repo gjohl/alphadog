@@ -112,3 +112,18 @@ def mock_strategy_config():
 @pytest.fixture
 def mock_strategy_dict():
     return strategy_config['VMOM1']
+
+
+@pytest.fixture
+def mock_instrument_weights_config():
+    return {
+        'equity': {
+            'weight': 0.7,
+            'uk': {'weight': 0.3},
+            'europe': {'weight': 0.3},
+            'us': {'weight': 0.4}
+        },
+        'bond': {
+            'weight': 0.3,
+        }
+    }

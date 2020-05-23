@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from alphadog.framework.config_handler import Instrument, Strategy
 from alphadog.framework.portfolio import (
     get_instrument_value_volatility, get_cash_vol_target_daily, get_vol_scalar,
+    get_weights_from_config,
     Forecast, Subsystem, Portfolio
 )
 from alphadog.internals.exceptions import InputDataError
@@ -294,9 +296,49 @@ def test_combine_signals():
     pass
 
 
-def test_get_weights_from_config():
-    # TODO TEST
-    pass
+class TestGetWeightsFromConfig:
+
+    def test_level_1(self):
+        weights_config = {'bias': {'weight': 0.6}, 'trend': {'weight': 0.4}}
+        strat_dict = {'strategy_name': 'BLONG', 'hierarchy_1': 'bias'}
+        strat = Strategy.from_config(strat_dict)
+
+        actual = get_weights_from_config(strat, weights_config)
+        expected = 0.6 * 1.
+        assert actual == expected
+
+    def test_level_2(self, mock_instrument, mock_instrument_weights_config):
+        actual = get_weights_from_config(mock_instrument, mock_instrument_weights_config)
+        expected = 0.7 * 0.3 * 0.333333333333333333
+        assert actual == expected
+
+    def test_level_3(self, mock_instrument_dict, mock_instrument_weights_config):
+        level3_dict = mock_instrument_dict.copy()
+        level3_dict['hierarchy_3'] = 'large_cap'
+        level3_inst = Instrument.from_config(level3_dict)
+        level3_inst.depth = lambda: 3
+
+        weights_config = mock_instrument_weights_config.copy()
+        weights_config['equity']['uk']['large_cap'] = {'weight': 0.8}
+        weights_config['equity']['uk']['small_cap'] = {'weight': 0.2}
+
+        actual = get_weights_from_config(level3_inst, weights_config)
+        expected = 0.7 * 0.3 * 0.8 * 0.333333333333333333
+        assert actual == expected
+
+    def test_higher_level_raises(self, mock_instrument_dict, mock_instrument_weights_config):
+        level4_dict = mock_instrument_dict.copy()
+        level4_dict['hierarchy_3'] = 'large_cap'
+        level4_dict['hierarchy_4'] = 'TOOHIGH'
+        level4_inst = Instrument.from_config(level4_dict)
+        level4_inst.depth = lambda: 4
+
+        weights_config = mock_instrument_weights_config.copy()
+        weights_config['equity']['uk']['large_cap'] = {'weight': 0.8}
+        weights_config['equity']['uk']['small_cap'] = {'weight': 0.2}
+
+        with pytest.raises(NotImplementedError):
+            get_weights_from_config(level4_inst, weights_config)
 
 
 class TestGetVolScalar:

@@ -10,9 +10,10 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Add tests for framework module: vol_scalar, get_div_mult, combine_signals, fix Subsystem test, add Portfolio tests
+- Add tests for framework module: get_div_mult, combine_signals, fix Subsystem test, add Portfolio tests
 - Add tests for TODO TEST placeholders
 - Flesh out portfolio framework and implement missing functionality
+- Try out some mean reversion strategies - from Algorithmic Trading
 - Add trading_capital csv, Handle reindexing trading_capital, calculating new capital to ffill etc
 - Add discretionary forecasts to data.inputs - date, instrument_id, forecast
 - Add accounting module - see pysystemtrade and quantopian pyfolio and alphalens
@@ -60,11 +61,10 @@ Keep track of ongoing work and priorities.
 - Handle passing different data objects from required_data_fixtures.
   Constant dict which maps each fixture name to the data retrieval function.
 - Add integration test - run everything, check we get something. Use scratch_5 as a starting point.
-
+- Read Algorithmic Trading, Ernie Chan
 
 
 ## To Read:
-- Algorithmic Trading, Ernie Chan
 - Kelly Criterion
 - Perry Kaufman signals book
 - Leveraged trading

@@ -565,13 +565,20 @@ def get_weights_from_config(config_object, weights_config):
     Gets the weight for each level, assigns equal weights to the lowest level,
     and multiplies these to give the weight for this specific object.
 
-    # TODO: tidy this up.
+    Parameters
+    ----------
+    config_object: Instrument, Strategy
+        The instrument or strategy to calculate the weight for
+    weights_config: dict
+        Nested dict containing each level of the hierarchy as a key and the weight for
+        an item at a particular level stored under the 'weight' key
 
     Returns
     -------
     float:
         Weight for the given `config_object`
     """
+    # TODO: Tidy this function up. This is ugly but it works.
     depth = config_object.depth()
 
     # Get weight for each level in turn
