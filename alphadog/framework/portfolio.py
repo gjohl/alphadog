@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from alphadog.internals.analytics import cross_sectional_mean
-from alphadog.internals.exceptions import InputDataError
+from alphadog.internals.exceptions import InputDataError, DimensionMismatchError
 from alphadog.internals.fx import get_fx
 from alphadog.data.data_quality import (
     check_scalar_is_above_min_threshold, check_nonempty_dataframe
@@ -52,7 +52,6 @@ class Portfolio:
             The target annualised percentage volatility.
             If not supplied, defaults to the constant specified in the framework directory.
         """
-        # TODO - handle the instrument's position in the hierarchy
         self._instrument_config = instrument_config or load_default_instrument_config()
         self._vol_target = vol_target
 
@@ -394,7 +393,7 @@ class Forecast:
     a price timeseries; could be fundamental data, machine learned features/parameters.
 
     The signal function can then take this and return a timeseries of raw forecasts.
-    These are then scaled and capped to have normalised aboslute mean, min and max values.
+    These are then scaled and capped to have normalised absolute mean, min and max values.
     """
     def __init__(self, signal_func, params, instrument_id='id', name='forecast'):
         """
@@ -496,33 +495,6 @@ class Forecast:
 # Utils #
 #########
 
-def get_diversification_multiplier(signal_df, vol_target):
-    """
-    Return the diversification multiplier for a combined signal.
-
-    Parameters
-    ----------
-    signal_df: pd.DataFrame
-        A single column DataFrame which is typically the result of combining other signals.
-    vol_target: float
-        The target annualised percentage volatility.
-
-    Returns
-    -------
-    div_multiplier: pd.DataFrame
-        The scaling factor to scale the input `signal_df` by to make it achieve the `target_vol`.
-    """
-    check_scalar_is_above_min_threshold(vol_target, 'vol_target', 0)
-
-    signal_vol = signal_df.ewm(span=VOL_SPAN).std() * 100
-    # TODO floor vol at minimum value?
-    daily_vol_target = vol_target / np.sqrt(TRADING_DAYS_PER_YEAR)
-    div_multiplier = daily_vol_target / signal_vol
-    div_multiplier = div_multiplier.clip(upper=MAX_DIVERSIFICATION_MULTIPLIER)
-
-    return div_multiplier
-
-
 def combine_signals(signals, weights, vol_target):
     """
     Combine the input signals as the weighted sum, and scale the result to reach the `target_vol`.
@@ -551,11 +523,66 @@ def combine_signals(signals, weights, vol_target):
     weighted_forecasts = sum(x * y for x, y in zip(signals, weights))
 
     # Scale back up to vol target
+    # TODO get_diversification_multiplier_from_correlations too and take an average
+    #  (geom, harmonic, arithmetic? - whichever is lowest)
     div_multiplier = get_diversification_multiplier(weighted_forecasts, vol_target)
     combined_df = weighted_forecasts * div_multiplier
     combined_df = combined_df.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
 
     return combined_df
+
+
+def get_diversification_multiplier(signals, weights):
+    """
+    Return the diversification multiplier for a combined signal.
+
+    Use the weights and correlations of the signals to calculate the reduction in volatility
+    when combining signals as WHWt. The diversification multiplier is the reciprocal of this, used
+    to scale the volatility of the combined signal back up.
+
+    Parameters
+    ----------
+    signals: list(pd.DataFrame)
+        List of Forecast signals or Subsystem signals which we want to combine.
+        Each signal should be a single column DataFrame.
+    weights: list(float)
+        Weight to assign each signal in the combined result.
+
+    Returns
+    -------
+    div_multiplier: float
+        The scaling factor to scale the weighted combination of input signals to make it
+        achieve the target volatility.
+    """
+    # TODO
+    # Sanitise inputs
+    if len(signals) != len(weights):
+        raise DimensionMismatchError(f"Number of weights does not equal number of signals. "
+                                     f"Got {len(weights)} weights but {len(signals)} signals.")
+    if not np.isclose(sum(weights), 1):
+        raise InputDataError("Weights must sum to 1.")
+    df = pd.concat(signals, axis=1)
+
+    # Calc correlation matrix H and floor
+    corr_matrix = df.corr()
+    corr_matrix = corr_matrix.fillna(0)
+    corr_matrix = corr_matrix.clip(lower=0)
+
+    # WHWt
+    weights_array = np.array(weights)
+    corr_array = corr_matrix.values.copy()
+    np.fill_diagonal(corr_array, 1.)  # Needed due to earlier fillna
+    combined_corr = np.matmul(weights_array, corr_array)
+    combined_corr = np.matmul(combined_corr, weights_array.T)
+
+    # 1 / WHWt
+    div_multiplier = 1 / np.sqrt(combined_corr)
+
+    # Clip between 1 and MAX_DIVERSIFICATION_MULTIPLIER
+    div_multiplier = max(div_multiplier, 1)
+    div_multiplier = min(div_multiplier, MAX_DIVERSIFICATION_MULTIPLIER)
+
+    return div_multiplier
 
 
 def get_weights_from_config(config_object, weights_config):

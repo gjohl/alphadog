@@ -9,3 +9,7 @@ class ParameterError(ValueError):
 
 class InputDataError(Exception):
     pass
+
+
+class DimensionMismatchError(Exception):
+    pass

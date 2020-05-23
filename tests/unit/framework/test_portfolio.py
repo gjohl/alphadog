@@ -5,10 +5,10 @@ import pytest
 from alphadog.framework.config_handler import Instrument, Strategy
 from alphadog.framework.portfolio import (
     get_instrument_value_volatility, get_cash_vol_target_daily, get_vol_scalar,
-    get_weights_from_config,
+    get_weights_from_config, get_diversification_multiplier,
     Forecast, Subsystem, Portfolio
 )
-from alphadog.internals.exceptions import InputDataError
+from alphadog.internals.exceptions import InputDataError, DimensionMismatchError
 
 
 def mock_signal(df, multiplier):
@@ -286,14 +286,48 @@ class TestForecast:
             Forecast(mock_signal, params, 'TESTID', 'TESTFORECAST')
 
 
-def test_get_diversification_multiplier():
-    # TODO TEST
-    pass
-
-
 def test_combine_signals():
     # TODO TEST
     pass
+
+
+class TestGetDiversificationMultiplier:
+
+    def test_success(self, mock_signal_list):
+        weights = [0.3, 0.3, 0.1, 0.3]
+        actual = get_diversification_multiplier(mock_signal_list, weights)
+        expected = 1.4873862360895242
+        assert actual == expected
+
+    def test_len_mismatch_raises(self, mock_signal_list):
+        """The signals list and weights list must be the same length."""
+        weights = [0.3, 0.7]
+        expected_msg = "Number of weights does not equal number of signals." \
+                       " Got 2 weights but 4 signals."
+        with pytest.raises(DimensionMismatchError, match=expected_msg):
+            get_diversification_multiplier(mock_signal_list, weights)
+
+    def test_weights_dont_sum_to_1_raises(self, mock_signal_list):
+        weights = [0.9, 0.3, 1, 1.5]
+        expected_msg = "Weights must sum to 1."
+        with pytest.raises(InputDataError, match=expected_msg):
+            get_diversification_multiplier(mock_signal_list, weights)
+
+    def test_both_lists_empty_raises(self):
+        signals = []
+        weights = []
+        expected_msg = "Weights must sum to 1."
+        with pytest.raises(InputDataError, match=expected_msg):
+            get_diversification_multiplier(signals, weights)
+
+    def test_multiplier_capped_above_max(self, mock_signal_list):
+        """Test that large diversification multipliers are capped at the maximum allowed value."""
+        const_sig = mock_signal_list[2]
+        signals = mock_signal_list[:3] + [const_sig] * 27
+        weights = [1/30] * 30
+        actual = get_diversification_multiplier(signals, weights)
+        expected = 2.5
+        assert actual == expected
 
 
 class TestGetWeightsFromConfig:
@@ -573,4 +607,3 @@ class TestGetCashVolTargetDaily:
         expected_msg = "Input vol_target is below the threshold value 1. Got 0.25"
         with pytest.raises(InputDataError, match=expected_msg):
             get_cash_vol_target_daily(vol_target, 10000)
-

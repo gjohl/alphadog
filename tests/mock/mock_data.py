@@ -59,3 +59,42 @@ def mock_trading_capital():
         index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=10), name='timestamp'),
         columns=['trading_capital']
     )
+
+
+@pytest.fixture
+def mock_forecast_signal():
+    return pd.DataFrame(
+        data=[10, 12, 14, 14, 15, 16, 20, 15, 10, 5,
+              0, -3.5, -4, -12, -8, -16, -20, -15, -0.5, 0.5],
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+        columns=['combined']
+    )
+
+
+@pytest.fixture
+def mock_signal_list():
+    sig1 = pd.DataFrame(
+        data=[10, 12, 14, 14, 15, 16, 20, 15, 10, 5,
+              0, -3.5, -4, -12, -8, -16, -20, -15, -0.5, 0.5],
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+        columns=['SIG1']
+    )
+    sig2 = pd.DataFrame(
+        data=[0.5, -0.5, -15, -20, -16, -8, -12, -4, -3.5,
+              0, 5, 10, 15, 20, 16, 15, 14, 14, 12, 10],
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+        columns=['SIG2']
+    )
+    sig3 = pd.DataFrame(
+        data=[10] * 20,
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+        columns=['SIG3']
+    )
+    sig4 = pd.DataFrame(
+        data=[5, 6, 7, 7, 7.5, 8, 10, 7.5, 5, 2.5,
+              0, -1.5, -2, -6, 4, -8, -10, -8, -1, 0],
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+        columns=['SIG4']
+    )
+    return [sig1, sig2, sig3, sig4]
+

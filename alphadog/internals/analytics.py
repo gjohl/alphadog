@@ -16,7 +16,7 @@ internals: any generic calculations
 import pandas as pd
 
 
-# TODO@ add a robust vol calc that floors the vol at a rolling min value
+# TODO: add a robust vol calc that floors the vol at a rolling min value
 
 
 def cross_sectional_mean(df, name='combined'):
