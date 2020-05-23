@@ -5,7 +5,7 @@ import pytest
 from alphadog.framework.config_handler import Instrument, Strategy
 from alphadog.framework.portfolio import (
     get_instrument_value_volatility, get_cash_vol_target_daily, get_vol_scalar,
-    get_weights_from_config, get_diversification_multiplier,
+    get_weights_from_config, get_diversification_multiplier, combine_signals,
     Forecast, Subsystem, Portfolio
 )
 from alphadog.internals.exceptions import InputDataError, DimensionMismatchError
@@ -286,9 +286,49 @@ class TestForecast:
             Forecast(mock_signal, params, 'TESTID', 'TESTFORECAST')
 
 
-def test_combine_signals():
-    # TODO TEST
-    pass
+class TestCombineSignals:
+
+    def test_success(self, mock_signal_list):
+        weights = [0.3, 0.3, 0.1, 0.3]
+        actual = combine_signals(mock_signal_list, weights)
+        expected = pd.DataFrame(
+            data=[8.403732233905812, 9.296163975559525, 4.164681461050669, 1.933602106916382,
+                  4.387789396464097, 8.626840169319241, 9.519271910972956, 9.742379846386383,
+                  6.618868750598383, 4.834005267290954, 3.7184655902238104, 3.7184655902238104,
+                  5.50332907353124, 2.3798179777432398, 6.841976686011811, -2.5285566013521907,
+                  -5.6520676971401915, -2.5285566013521907, 6.172652879771525, 6.172652879771526],
+            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+            columns=['combined']
+        )
+        pd.testing.assert_frame_equal(actual, expected)
+
+    def test_result_is_clipped(self, mock_signal_list):
+        """Test that a results outside the allowed min or max forecast is clipped."""
+        const_sig = mock_signal_list[2]
+        signals = mock_signal_list[:3] + [const_sig] * 7
+        weights = [1/10] * 10
+        actual = combine_signals(signals, weights)
+        expected = pd.DataFrame(
+            data=[20.0, 20.0, 19.75, 18.5, 19.75, 20.0, 20.0, 20.0, 20.0, 20.0,
+                  20.0, 20.0, 20.0, 20.0, 20.0, 19.75, 18.5, 19.75, 20.0, 20.0],
+            index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+            columns=['combined']
+        )
+        pd.testing.assert_frame_equal(actual, expected)
+
+    def test_len_mismatch_raises(self, mock_signal_list):
+        """The signals list and weights list must be the same length."""
+        weights = [0.3, 0.7]
+        expected_msg = "Number of weights does not equal number of signals." \
+                       " Got 2 weights but 4 signals."
+        with pytest.raises(DimensionMismatchError, match=expected_msg):
+            combine_signals(mock_signal_list, weights)
+
+    def test_weights_dont_sum_to_1_raises(self, mock_signal_list):
+        weights = [0.9, 0.3, 1, 1.5]
+        expected_msg = "Weights must sum to 1."
+        with pytest.raises(InputDataError, match=expected_msg):
+            combine_signals(mock_signal_list, weights)
 
 
 class TestGetDiversificationMultiplier:

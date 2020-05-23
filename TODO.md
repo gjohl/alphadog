@@ -10,7 +10,7 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Add tests for framework module: get_div_mult, combine_signals, fix Subsystem test, add Portfolio tests
+- Add tests for framework module: fix Subsystem test, add Portfolio tests. Check why forecasts are all the same.
 - Add tests for TODO TEST placeholders
 - Flesh out portfolio framework and implement missing functionality
 - Try out some mean reversion strategies - from Algorithmic Trading

@@ -376,7 +376,7 @@ class Subsystem:
         Sets the subsystem_position and associated parameters.
         """
         # Combine signals
-        self._combined_forecast = combine_signals(self.capped_forecasts, self.fweights, self.vol_target)  # noqa
+        self._combined_forecast = combine_signals(self.capped_forecasts, self.fweights)
 
         # Calc subsystem position
         self._vol_scalar = get_vol_scalar(
@@ -495,7 +495,7 @@ class Forecast:
 # Utils #
 #########
 
-def combine_signals(signals, weights, vol_target):
+def combine_signals(signals, weights):
     """
     Combine the input signals as the weighted sum, and scale the result to reach the `target_vol`.
 
@@ -506,8 +506,6 @@ def combine_signals(signals, weights, vol_target):
         Each signal should be a single column DataFrame.
     weights: list(float)
         Weight to assign each signal in the combined result.
-    vol_target: float
-        The target annualised percentage volatility.
 
     Returns
     -------
@@ -516,18 +514,21 @@ def combine_signals(signals, weights, vol_target):
         achieve the vol target.
     """
     # Check the weights are valid
-    assert len(signals) == len(weights)
-    assert np.isclose(sum(weights), 1)
+    if len(signals) != len(weights):
+        raise DimensionMismatchError(f"Number of weights does not equal number of signals. "
+                                     f"Got {len(weights)} weights but {len(signals)} signals.")
+    if not np.isclose(sum(weights), 1):
+        raise InputDataError("Weights must sum to 1.")
 
     # Combine signals according to their weights
-    weighted_forecasts = sum(x * y for x, y in zip(signals, weights))
+    weighted_forecasts_list = [x * y for x, y in zip(signals, weights)]
+    weighted_forecasts = pd.concat(weighted_forecasts_list, axis=1).sum(axis=1)
 
     # Scale back up to vol target
-    # TODO get_diversification_multiplier_from_correlations too and take an average
-    #  (geom, harmonic, arithmetic? - whichever is lowest)
-    div_multiplier = get_diversification_multiplier(weighted_forecasts, vol_target)
+    div_multiplier = get_diversification_multiplier(signals, weights)
     combined_df = weighted_forecasts * div_multiplier
     combined_df = combined_df.clip(lower=MIN_FORECAST, upper=MAX_FORECAST)
+    combined_df = combined_df.to_frame('combined')
 
     return combined_df
 
@@ -537,8 +538,8 @@ def get_diversification_multiplier(signals, weights):
     Return the diversification multiplier for a combined signal.
 
     Use the weights and correlations of the signals to calculate the reduction in volatility
-    when combining signals as WHWt. The diversification multiplier is the reciprocal of this, used
-    to scale the volatility of the combined signal back up.
+    when combining signals as sqrt(WHWt). The diversification multiplier is the reciprocal of this,
+    used to scale the volatility of the combined signal back up.
 
     Parameters
     ----------
@@ -554,7 +555,6 @@ def get_diversification_multiplier(signals, weights):
         The scaling factor to scale the weighted combination of input signals to make it
         achieve the target volatility.
     """
-    # TODO
     # Sanitise inputs
     if len(signals) != len(weights):
         raise DimensionMismatchError(f"Number of weights does not equal number of signals. "
@@ -575,7 +575,7 @@ def get_diversification_multiplier(signals, weights):
     combined_corr = np.matmul(weights_array, corr_array)
     combined_corr = np.matmul(combined_corr, weights_array.T)
 
-    # 1 / WHWt
+    # 1 / sqrt(WHWt)
     div_multiplier = 1 / np.sqrt(combined_corr)
 
     # Clip between 1 and MAX_DIVERSIFICATION_MULTIPLIER
