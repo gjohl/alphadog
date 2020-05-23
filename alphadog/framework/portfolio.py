@@ -249,7 +249,7 @@ class Subsystem:
     @property
     def vol_scalar(self):
         """
-        pd.Series:
+        pd.DataFrame:
             Volatility scalar.
             The number of instrument blocks required to hit the volatility target
             with an average forecast.
@@ -285,6 +285,18 @@ class Subsystem:
         return self.instrument.is_traded
 
     @property
+    def required_data_fixtures(self):
+        """
+        List of unique data fixtures required for the signals run on this object.
+
+        Returns
+        -------
+        list(str)
+            List of data fixture names.
+        """
+        return self.instrument.required_data_fixtures
+
+    @property
     def strategies(self):
         """dict: Strategies to run for this instrument."""
         return self.instrument.strategies
@@ -308,18 +320,6 @@ class Subsystem:
             weights_dict[strat_name] = weight
 
         return weights_dict
-
-    @property
-    def required_data_fixtures(self):
-        """
-        List of unique data fixtures required for the signals run on this object.
-
-        Returns
-        -------
-        list(str)
-            List of data fixture names.
-        """
-        return self.instrument.required_data_fixtures
 
     @property
     def trading_capital(self):
@@ -512,9 +512,10 @@ def get_diversification_multiplier(signal_df, vol_target):
     div_multiplier: pd.DataFrame
         The scaling factor to scale the input `signal_df` by to make it achieve the `target_vol`.
     """
-    assert vol_target > 0
+    check_scalar_is_above_min_threshold(vol_target, 'vol_target', 0)
 
     signal_vol = signal_df.ewm(span=VOL_SPAN).std() * 100
+    # TODO floor vol at minimum value?
     daily_vol_target = vol_target / np.sqrt(TRADING_DAYS_PER_YEAR)
     div_multiplier = daily_vol_target / signal_vol
     div_multiplier = div_multiplier.clip(upper=MAX_DIVERSIFICATION_MULTIPLIER)
@@ -608,70 +609,10 @@ def get_weights_from_config(config_object, weights_config):
 # Portfolio-specific utils #
 ############################
 
-def get_pweights(subsystem_list):
-    """
-    UNUSED
-
-    Return a list of portfolio weights for a given subsystem list
-
-    Parameters
-    ----------
-    subsystem_list: list(Subsystem)
-        The subsystems to include in a portfolio.
-
-    Returns
-    -------
-    pweights: list(float)
-        The fraction of the portfolio to allocate to each Subsystem in the list.
-    """
-    # TODO: As a first pass this just assigns equal weights. Calculate this correctly.
-    #   It may make sense to combine the logic for fweights and pweights into a single function
-    #   and call that here and in get_fweights.
-    return get_equal_weights(subsystem_list)
-
 
 ############################
 # Subsystem-specific utils #
 ############################
-
-def get_equal_weights(input_list):
-    """
-    UNUSED
-
-    Get equal weights for a given list.
-
-    Returns
-    -------
-    list(float)
-        A list of len(input_list) with equal weights
-    """
-    num_items = len(input_list)
-    equal_weight = 1 / num_items
-    weights = [equal_weight] * num_items
-
-    return weights
-
-
-def get_fweights(forecast_list):
-    """
-    UNUSED
-
-    Return a list of forecast weights for a given forecast_list.
-
-    Parameters
-    ----------
-    forecast_list: list(Forecast)
-        The Forecast signals to include in an instrument.
-
-    Returns
-    -------
-    fweights: list(float)
-        The fraction of the instrument to allocate to each Forecast in the list.
-    """
-    # TODO: As a first pass, this currently just assigns equal weights to all forecasts.
-    #  These should actually vary depending on correlations.
-    return get_equal_weights(forecast_list)
-
 
 def get_vol_scalar(price_df, fx_rate, vol_target, trading_capital):
     """
@@ -805,5 +746,3 @@ def get_cash_vol_target_daily(vol_target, trading_capital):
         cash_vol_target_daily = cash_vol_target_daily.iloc[:, 0]
 
     return cash_vol_target_daily
-
-
