@@ -3,6 +3,8 @@ Systematic framework.
 
 Largely follows the methodology in Systematic Trading, Robert Carver.
 """
+import logging
+
 import numpy as np
 import pandas as pd
 
@@ -133,9 +135,15 @@ class Portfolio:
 
         return weights_dict
 
-    def run_subsystems(self):
+    def run_subsystems(self, rescale=True):
         """
         Run all subsystems supplied for the Instrument.
+
+        Parameters
+        ----------
+        rescale: bool
+            Whether to scale the pweights if they don't already sum to 1.
+            Default True
 
         Returns
         -------
@@ -151,9 +159,13 @@ class Portfolio:
             subsystem_list.append(Subsystem(instrument))
             pweight_list.append(self.instrument_weights[instrument_id])
 
+        total_weight = sum(pweight_list)
+        if rescale and not np.isclose(total_weight, 1):
+            rescale_factor = 1 / total_weight
+            pweight_list = [pw * rescale_factor for pw in pweight_list]
+
         self._subsystems = subsystem_list
         self._pweights = pweight_list
-        # TODO: Scale sum of pweights back to 1 here?
 
     def combine_subsystems(self):
         """
@@ -738,6 +750,7 @@ def get_instrument_value_volatility(price_df, fx_rate, asset_class='equity'):
         check_scalar_is_above_min_threshold(fx_rate, 'fx_rate', 0)
         fx_reindexed = fx_rate
 
+    # FIXME: this should be pct returns not price - see p 298
     price_vol = block_value.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
     instrument_currency_vol = block_value * price_vol
     instrument_value_vol = instrument_currency_vol * fx_reindexed

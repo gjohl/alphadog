@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -64,7 +66,7 @@ class TestPortfolio:
 
     def test_untraded_instrument(self, mock_instrument_config):
         """Test an instrument with is_traded=False is not included in the Portfolio"""
-        instrument_config = mock_instrument_config.copy()
+        instrument_config = deepcopy(mock_instrument_config)
         instrument_config['FTSE250']['is_traded'] = False
         actual = Portfolio(instrument_config)
         expected_traded_instruments = ['FTSE100', 'FTSEAS']
@@ -72,14 +74,26 @@ class TestPortfolio:
         assert list(actual.instruments.keys()) == expected_traded_instruments
         assert all([isinstance(inst, Instrument) for inst in actual.instruments.values()])
 
-    def test_run_subsystems(self, mock_instrument_config):
+    def test_subsystems_list(self, mock_instrument_config):
         """Test the list of Subsystems in the Portfolio after running the run_subsystems method."""
-        # TODO TEST
         actual = Portfolio(mock_instrument_config)
         actual.run_subsystems()
-        # subsystems
-        # pweights
-        pass
+        assert len(actual.subsystems) == 3
+        assert all([isinstance(ss, Subsystem) for ss in actual.subsystems])
+        assert all([not ss.subsystem_position.empty for ss in actual.subsystems])
+        assert list(actual.subsystems[0].subsystem_position.columns) == ['FTSE100']
+        assert list(actual.subsystems[1].subsystem_position.columns) == ['FTSE250']
+        assert list(actual.subsystems[2].subsystem_position.columns) == ['FTSEAS']
+
+    @pytest.mark.parametrize('rescale, expected_weight', [
+        [False, 0.7 * 0.3 * 0.3333333333333333],
+        [True, 0.3333333333333333]
+    ])
+    def test_pweights_list(self, mock_instrument_config, rescale, expected_weight):
+        """Test the list of portfolio weights after running the run_subsystems method."""
+        actual = Portfolio(mock_instrument_config)
+        actual.run_subsystems(rescale=rescale)
+        actual.pweights == [expected_weight] * 3
 
     def test_combine_subsystems(self):
         """Test the combined positions after running the combine_subsystems method."""
