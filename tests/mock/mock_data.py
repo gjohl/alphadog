@@ -43,6 +43,16 @@ def mock_ohlcv():
 
 
 @pytest.fixture
+def mock_volatile_prices():
+    return pd.DataFrame(
+        data=[78.4, 83.21, 79.51, 75.13, 72.41, 73.82, 74.86, 73.8, 69.57, 70.17,
+              76.44, 76.21, 75.71, 79.18, 78.52, 77.67, 80.69, 77.6, 77.02, 75.99],
+        index=pd.DatetimeIndex(pd.bdate_range('2019-01-01', periods=20), name='timestamp'),
+        columns=['price']
+    )
+
+
+@pytest.fixture
 def mock_fx_rate():
     return pd.DataFrame(
         data=[0.784, 0.7986, 0.7918, 0.7852, 0.7821, 0.7851, 0.7813, 0.7841, 0.7782, 0.7767,

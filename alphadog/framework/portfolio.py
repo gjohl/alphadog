@@ -8,7 +8,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from alphadog.internals.analytics import cross_sectional_mean
+from alphadog.internals.analytics import cross_sectional_mean, returns
 from alphadog.internals.exceptions import InputDataError, DimensionMismatchError
 from alphadog.internals.fx import get_fx
 from alphadog.data.data_quality import (
@@ -749,6 +749,8 @@ def get_instrument_value_volatility(price_df, fx_rate, asset_class='equity'):
     """
     # TODO: this currently only works for equities
     if asset_class == 'equity':
+        # Assuming we trade in blocks of 100 shares
+        # This is the value of a 1% move in the price of the underlying
         block_value = price_df.copy()
     else:
         raise NotImplementedError(f"Block value calculations for {asset_class} "
@@ -767,8 +769,8 @@ def get_instrument_value_volatility(price_df, fx_rate, asset_class='equity'):
         check_scalar_is_above_min_threshold(fx_rate, 'fx_rate', 0)
         fx_reindexed = fx_rate
 
-    # FIXME: this should be pct returns not price - see p 298
-    price_vol = block_value.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
+    price_returns = returns(price_df, 'arithmetic', percent=True)
+    price_vol = price_returns.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
     instrument_currency_vol = block_value * price_vol
     instrument_value_vol = instrument_currency_vol * fx_reindexed
     instrument_value_vol.columns = ['instrument_value_volatility']

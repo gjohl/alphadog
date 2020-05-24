@@ -6,5 +6,5 @@ from tests.mock.mock_config import (
 )
 from tests.mock.mock_data import (
     mock_price, mock_ohlcv, mock_fx_rate, mock_trading_capital, mock_forecast_signal,
-    mock_signal_list
+    mock_signal_list, mock_volatile_prices
 )

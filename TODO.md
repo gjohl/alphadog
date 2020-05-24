@@ -10,8 +10,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Calc returns function - pct, log, diff
-- Fix vol_scalar function
 - Add subsystem_returns property to Subsystem
 - Fix Portfolio combine_subsystems - calc div_multiplier using Subsystem returns
 
@@ -68,7 +66,8 @@ Keep track of ongoing work and priorities.
   Constant dict which maps each fixture name to the data retrieval function.
 - Add integration test - run everything, check we get something. Use scratch_5 as a starting point.
 - Read Algorithmic Trading, Ernie Chan
-
+- Calc returns function - pct, log, diff
+- Fix vol_scalar function
 
 ## To Read:
 - Kelly Criterion
