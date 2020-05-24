@@ -32,7 +32,7 @@ def expected_instrument_value_vol():
 
 
 class TestPortfolio:
-    # TODO TEST
+
     def test_instantiation_with_config(self, mock_instrument_config):
         """Test a Portfolio instantiates with an input config."""
         actual = Portfolio(mock_instrument_config)
@@ -95,12 +95,16 @@ class TestPortfolio:
         actual.run_subsystems(rescale=rescale)
         actual.pweights == [expected_weight] * 3
 
-    def test_combine_subsystems(self):
+    def test_combine_subsystems(self, mock_instrument_config):
         """Test the combined positions after running the combine_subsystems method."""
-        # TODO TEST
-        # diversification mults
-        # target_position
-        pass
+        actual = Portfolio(mock_instrument_config)
+        actual.run_subsystems()
+        actual.combine_subsystems()
+        expected_instruments = {'FTSE100', 'FTSE250', 'FTSEAS'}
+        assert actual.diversification_multiplier >= 1
+        assert actual.diversification_multiplier <= 2.5
+        assert set(actual.target_position.columns) == expected_instruments
+        assert not actual.target_position.dropna().empty
 
 
 class TestSubsystem:

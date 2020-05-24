@@ -10,9 +10,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Fix Portfolio combine_subsystems - calc div_multiplier using Subsystem returns
-
-- Add tests for framework module: add Portfolio tests.
 - Make repr nice for  Portfolio, Subsystem, Forecast
 - Add tests for TODO TEST placeholders
 - Flesh out portfolio framework and implement missing functionality
@@ -68,6 +65,9 @@ Keep track of ongoing work and priorities.
 - Calc returns function - pct, log, diff
 - Fix vol_scalar function
 - Add subsystem_returns property to Subsystem
+- Fix Portfolio combine_subsystems - calc div_multiplier using Subsystem returns
+- Add tests for framework module: add Portfolio tests.
+
 
 
 ## To Read:

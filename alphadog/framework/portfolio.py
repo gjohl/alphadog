@@ -58,7 +58,7 @@ class Portfolio:
         self._vol_target = vol_target
 
         self._subsystems = None
-        self._diversification_multipliers = None
+        self._diversification_multiplier = None
         self._pweights = None
         self._target_position = None
 
@@ -81,9 +81,9 @@ class Portfolio:
         return self._subsystems
 
     @property
-    def diversification_multipliers(self):
-        """list(float): Diversification scalar for each subsystem."""
-        return self._diversification_multipliers
+    def diversification_multiplier(self):
+        """float: Instrument diversification multiplier."""
+        return self._diversification_multiplier
 
     @property
     def pweights(self):
@@ -161,6 +161,7 @@ class Portfolio:
 
         total_weight = sum(pweight_list)
         if rescale and not np.isclose(total_weight, 1):
+            logging.warning(f"Rescaling pweights - original total weight was {total_weight}")
             rescale_factor = 1 / total_weight
             pweight_list = [pw * rescale_factor for pw in pweight_list]
 
@@ -174,21 +175,16 @@ class Portfolio:
         Returns
         -------
         """
-        # TODO: can this reuse combine_signals?
-        # Weight the instrument subsystems and scale to get target portfolio positions.
-        diversification_multipliers = [
-            get_diversification_multiplier(subsystem.subsystem_position, self.vol_target)
-            for subsystem in self.subsystems
-        ]
-        self._diversification_multipliers = diversification_multipliers
+        subsystem_returns = [sub.subsystem_returns for sub in self.subsystems]
+        div_multiplier = get_diversification_multiplier(subsystem_returns, self.pweights)
+        self._diversification_multiplier = div_multiplier
 
         # TODO: account for missing data, varying pweights
-        weighted_subsystems = [
-            subsystem.subsystem_position * weight * div_mult for subsystem, weight, div_mult
-            in zip(self.subsystems, self.pweights, self.diversification_multipliers)
-        ]
+        subsystem_positions = [sub.subsystem_position for sub in self.subsystems]
+        portfolio_positions_list = [x * y for x, y in zip(subsystem_positions, self.pweights)]
+        portfolio_positions = pd.concat(portfolio_positions_list, axis=1)
 
-        self._target_position = pd.concat(weighted_subsystems, axis=1).sum(axis=1)
+        self._target_position = portfolio_positions * self.diversification_multiplier
 
 
 class Subsystem:
