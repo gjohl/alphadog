@@ -382,7 +382,8 @@ class Subsystem:
         self._vol_scalar = get_vol_scalar(
             self.price_data.df, self.fx_rate, self.vol_target, self.trading_capital
         )
-        self._subsystem_position = self.vol_scalar * self.combined_forecast / AVG_FORECAST
+        final_position = self.vol_scalar['vol_scalar'] * self.combined_forecast['combined'] / AVG_FORECAST
+        self._subsystem_position = final_position.to_frame(self.instrument_id)
 
 
 class Forecast:

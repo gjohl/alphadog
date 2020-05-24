@@ -56,6 +56,11 @@ class TestPortfolio:
         # instrument_weights
         pass
 
+    def test_untraded_instrument(self):
+        """Test an instrument with is_traded=False is not included in the Portfolio"""
+        # TODO TEST
+        pass
+
     def test_subsystem_lists(self):
         """Test the list of Subsystems in the Portfolio."""
         # TODO TEST
@@ -121,25 +126,35 @@ class TestSubsystem:
         assert all([fw > 0 for fw in actual.fweights])
         assert sum(actual.fweights) == 1.
 
-    def test_position(self, mock_instrument):
-        """Test the combined forecasts and final position."""
-        # TODO TEST
+    def test_capped_forecasts(self, mock_instrument):
+        """Test the capped forecasts have the expected shape and non-identical values."""
         actual = Subsystem(mock_instrument)
+        capped_fc = pd.concat(actual.capped_forecasts, axis=1)
         expected_strategies = ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6",
                                "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
         expected_forecast_names = set([f"FTSE100|{strat}" for strat in expected_strategies])
+        assert set(capped_fc.columns) == expected_forecast_names
 
-        assert actual.fx_rate == 1.
+        # Check there are no identical columns of values
+        for col_number in range(capped_fc.shape[1]):
+            test_array = capped_fc.iloc[:, col_number].values
+            remaining_df = capped_fc.loc[:, capped_fc.columns[col_number+1:]]
+            for remaining_col_number in range(remaining_df.shape[1]):
+                assert not all(test_array == remaining_df.values[:, remaining_col_number])
 
-        assert set(actual.combined_forecast.columns) == expected_forecast_names
-        assert not actual.combined_forecast.dropna().empty  # TODO
+    def test_position(self, mock_instrument):
+        """Test the combined forecasts and final position."""
+        actual = Subsystem(mock_instrument)
 
-        set(actual.vol_scalar.columns) == {'vol_scalar'}  # TODO
+        assert set(actual.combined_forecast.columns) == {'combined'}
+        assert not actual.combined_forecast.dropna().empty
+
+        set(actual.vol_scalar.columns) == {'vol_scalar'}
         assert not actual.vol_scalar.dropna().empty
 
-        assert actual.subsystem_position.shape[1] == 1  # TODO
-        set(actual.subsystem_position.columns) == {'FTSE100'}  # TODO
-        assert not actual.subsystem_position.dropna().empty  # TODO
+        assert actual.subsystem_position.shape[1] == 1
+        set(actual.subsystem_position.columns) == {'FTSE100'}
+        assert not actual.subsystem_position.dropna().empty
 
 
 class TestForecast:

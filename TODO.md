@@ -10,7 +10,7 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Add tests for framework module: fix Subsystem test, add Portfolio tests.
+- Add tests for framework module: add Portfolio tests. Check vol scalar results.
 - Add tests for TODO TEST placeholders
 - Flesh out portfolio framework and implement missing functionality
 - Try out some mean reversion strategies - from Algorithmic Trading
