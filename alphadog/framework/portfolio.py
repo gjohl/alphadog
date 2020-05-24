@@ -62,6 +62,9 @@ class Portfolio:
         self._pweights = None
         self._target_position = None
 
+    def __repr__(self):
+        return f"Portfolio {self.__class__}\nContaining instruments: {self.traded_instruments}"
+
     @property
     def instrument_config(self):
         """
@@ -228,6 +231,9 @@ class Subsystem:
         self.run_forecasts()
         self.calc_position()
         self.calc_returns()
+
+    def __repr__(self):
+        return f"{self.instrument_id} Subsystem {self.__class__}"
 
     @property
     def instrument(self):
@@ -457,6 +463,9 @@ class Forecast:
         self._capped_forecast = None
 
         self.run_signal()
+
+    def __repr__(self):
+        return f"{self.name} Forecast {self.__class__}"
 
     @property
     def signal_func(self):

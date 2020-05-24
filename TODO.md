@@ -10,7 +10,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Make repr nice for  Portfolio, Subsystem, Forecast
 - Add tests for TODO TEST placeholders
 - Flesh out portfolio framework and implement missing functionality
 - Try out some mean reversion strategies - from Algorithmic Trading
@@ -67,7 +66,7 @@ Keep track of ongoing work and priorities.
 - Add subsystem_returns property to Subsystem
 - Fix Portfolio combine_subsystems - calc div_multiplier using Subsystem returns
 - Add tests for framework module: add Portfolio tests.
-
+- Make repr nice for  Portfolio, Subsystem, Forecast
 
 
 ## To Read:
