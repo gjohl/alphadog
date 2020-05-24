@@ -139,7 +139,10 @@ class Portfolio:
 
         Returns
         -------
-        Sets subsystems
+        None
+            Sets subsystems.
+            Runs each subsystem in turn and creates a list of Subsystems and a list of
+            their corresponding weights.
         """
         subsystem_list = []
         pweight_list = []
@@ -150,6 +153,7 @@ class Portfolio:
 
         self._subsystems = subsystem_list
         self._pweights = pweight_list
+        # TODO: Scale sum of pweights back to 1 here?
 
     def combine_subsystems(self):
         """

@@ -31,47 +31,60 @@ def expected_instrument_value_vol():
 
 class TestPortfolio:
     # TODO TEST
-    def test_instantiation_with_config(self):
+    def test_instantiation_with_config(self, mock_instrument_config):
         """Test a Portfolio instantiates with an input config."""
-        # TODO TEST
-        # instument_config
-        # vol_target
-        pass
+        actual = Portfolio(mock_instrument_config)
+        assert actual.instrument_config == mock_instrument_config
+        assert actual.vol_target == 10
 
     def test_instantiation_default_config(self):
         """Test a Portfolio instantiates with a default config."""
-        # TODO TEST
-        pass
+        actual = Portfolio()
+        assert 'UKGOV' in actual.instrument_config.keys()
+        assert 'USGOV' in actual.instrument_config.keys()
+        assert 'EUROGOV' in actual.instrument_config.keys()
+        assert actual.vol_target == 10
 
-    def test_instantiation_with_input_vol_target(self):
+    def test_instantiation_with_input_vol_target(self, mock_instrument_config):
         """Test a Portfolio instantiates with an input vol_target."""
-        # TODO TEST
-        pass
+        input_vol = 50.5
+        actual = Portfolio(mock_instrument_config, input_vol)
+        assert actual.instrument_config == mock_instrument_config
+        assert actual.vol_target == input_vol
 
-    def test_properties(self):
-        """Test the properties of the Portfolio are present."""
-        # TODO TEST
-        # traded_instruments
-        # instruments
-        # instrument_weights
-        pass
+    def test_instrument_properties(self, mock_instrument_config):
+        """Test the properties derived from each Instrument are present."""
+        actual = Portfolio(mock_instrument_config)
+        expected_traded_instruments = ['FTSE100', 'FTSE250', 'FTSEAS']
+        assert actual.traded_instruments == expected_traded_instruments
+        assert list(actual.instruments.keys()) == expected_traded_instruments
+        assert all([isinstance(inst, Instrument) for inst in actual.instruments.values()])
+        assert list(actual.instrument_weights.keys()) == expected_traded_instruments
+        assert list(actual.instrument_weights.values()) == [0.7 * 0.3 * 0.3333333333333333] * 3
 
-    def test_untraded_instrument(self):
+    def test_untraded_instrument(self, mock_instrument_config):
         """Test an instrument with is_traded=False is not included in the Portfolio"""
-        # TODO TEST
-        pass
+        instrument_config = mock_instrument_config.copy()
+        instrument_config['FTSE250']['is_traded'] = False
+        actual = Portfolio(instrument_config)
+        expected_traded_instruments = ['FTSE100', 'FTSEAS']
+        assert actual.traded_instruments == expected_traded_instruments
+        assert list(actual.instruments.keys()) == expected_traded_instruments
+        assert all([isinstance(inst, Instrument) for inst in actual.instruments.values()])
 
-    def test_subsystem_lists(self):
-        """Test the list of Subsystems in the Portfolio."""
+    def test_run_subsystems(self, mock_instrument_config):
+        """Test the list of Subsystems in the Portfolio after running the run_subsystems method."""
         # TODO TEST
+        actual = Portfolio(mock_instrument_config)
+        actual.run_subsystems()
         # subsystems
         # pweights
-        # diversification mults
         pass
 
-    def test_combined_position(self):
-        """Test the combined subsystems and final target position."""
+    def test_combine_subsystems(self):
+        """Test the combined positions after running the combine_subsystems method."""
         # TODO TEST
+        # diversification mults
         # target_position
         pass
 
