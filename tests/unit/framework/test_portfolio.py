@@ -183,6 +183,13 @@ class TestSubsystem:
         set(actual.subsystem_position.columns) == {'FTSE100'}
         assert not actual.subsystem_position.dropna().empty
 
+    def test_returns(self, mock_instrument):
+        """Test the returns of the Subsystem."""
+        actual = Subsystem(mock_instrument)
+        assert actual.subsystem_returns.shape[1] == 1
+        set(actual.subsystem_returns.columns) == {'FTSE100'}
+        assert not actual.subsystem_returns.dropna().empty
+
 
 class TestForecast:
 

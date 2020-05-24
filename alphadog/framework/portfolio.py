@@ -227,9 +227,11 @@ class Subsystem:
         self._combined_forecast = None
         self._vol_scalar = None
         self._subsystem_position = None
+        self._subsystem_returns = None
 
         self.run_forecasts()
         self.calc_position()
+        self.calc_returns()
 
     @property
     def instrument(self):
@@ -275,6 +277,11 @@ class Subsystem:
     def subsystem_position(self):
         """pd.DataFrame: Target position to take in this instrument."""
         return self._subsystem_position
+
+    @property
+    def subsystem_returns(self):
+        """pd.DataFrame: The returns of the Subsystem. Single col with instrument_id."""
+        return self._subsystem_returns
 
     @property
     def currency(self):
@@ -403,20 +410,19 @@ class Subsystem:
 
     def calc_returns(self):
         """
-        Calculate the returns of the Subsystem
+        Calculate the returns of the Subsystem.
+
+        Calculate the price returns and use the subsystem positions to get the subsystem returns.
 
         Returns
         -------
         Sets the subsystem_returns parameter
         """
-        # FIXME: Implement this
-        # Calc LOG returns using this:
-        # instrument_returns = calc_returns(self.price_data.df)
-
-        # Then multiply by (lagged) position
-        # subsystem_returns = instrument_returns.lag(1) * self.subsystem_position
-
-        # self._subsystem_returns = subsystem_returns  # TODO make a property for this and include in init
+        instrument_returns = returns(self.price_data.df, 'geometric', percent=True).iloc[:, 0]
+        positions = self.subsystem_position[self.instrument_id]
+        subsystem_returns = instrument_returns.shift() * positions
+        subsystem_returns = subsystem_returns.to_frame(self.instrument_id)
+        self._subsystem_returns = subsystem_returns
 
 
 class Forecast:

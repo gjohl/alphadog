@@ -10,7 +10,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Add subsystem_returns property to Subsystem
 - Fix Portfolio combine_subsystems - calc div_multiplier using Subsystem returns
 
 - Add tests for framework module: add Portfolio tests.
@@ -68,6 +67,8 @@ Keep track of ongoing work and priorities.
 - Read Algorithmic Trading, Ernie Chan
 - Calc returns function - pct, log, diff
 - Fix vol_scalar function
+- Add subsystem_returns property to Subsystem
+
 
 ## To Read:
 - Kelly Criterion
