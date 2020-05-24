@@ -527,7 +527,7 @@ class Forecast:
         self._raw_forecast = self.signal_func(**self.params)
         if self.raw_forecast.empty:
             raise InputDataError(f"{self.name} has an empty raw forecast. Check inputs.")
-        self._forecast_scalar = AVG_FORECAST / self.raw_forecast.abs().mean()
+        self._forecast_scalar = AVG_FORECAST / self.raw_forecast.abs().median()
         self._scaled_forecast = self.raw_forecast * self.forecast_scalar
 
         # We may want to revisit this cross_sectional_mean step in future.
