@@ -401,6 +401,23 @@ class Subsystem:
         final_position = self.vol_scalar['vol_scalar'] * self.combined_forecast['combined'] / AVG_FORECAST
         self._subsystem_position = final_position.to_frame(self.instrument_id)
 
+    def calc_returns(self):
+        """
+        Calculate the returns of the Subsystem
+
+        Returns
+        -------
+        Sets the subsystem_returns parameter
+        """
+        # FIXME: Implement this
+        # Calc LOG returns using this:
+        # instrument_returns = calc_returns(self.price_data.df)
+
+        # Then multiply by (lagged) position
+        # subsystem_returns = instrument_returns.lag(1) * self.subsystem_position
+
+        # self._subsystem_returns = subsystem_returns  # TODO make a property for this and include in init
+
 
 class Forecast:
     """
