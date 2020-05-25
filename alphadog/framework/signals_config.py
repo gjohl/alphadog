@@ -97,6 +97,7 @@ PARAMETERISED_STRATEGIES["BLONG"] = {
 # Data Fixtures #
 #################
 
+# TODO: move to data.retrieval?
 def get_price_df(instrument_id):
     return PriceData.from_instrument_id(instrument_id).df
 

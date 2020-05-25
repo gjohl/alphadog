@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e8f74f11-bcc3-4477-a2c8-d1a4065b67b5" name="Default Changelist" comment="" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +19,10 @@
   </component>
   <component name="ProjectId" id="1R3ujIeI9iVwGZiAHuTAroB0jEE" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -40,91 +43,68 @@
       <recent name="$PROJECT_DIR$/tests/unit" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
-  <component name="RunManager" selected="Python tests.pytest for test_momentum.TestMomentumSignal.test_multiple_column_df">
-    <configuration name="pytest for test_momentum.TestMomentumSignal" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python tests.pytest for test_data_quality.TestCheckPriceData.test_empty_df">
+    <configuration name="pytest for test_data_quality.TestCheckPriceData.test_bad_columns_raises" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="alphadog" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/strategies" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/data" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_momentum.TestMomentumSignal&quot;" />
+      <option name="_new_target" value="&quot;test_data_quality.TestCheckPriceData.test_bad_columns_raises&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_momentum.TestMomentumSignal.test_empty_df" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data_quality.TestCheckPriceData.test_bad_prices_raises" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="alphadog" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/strategies" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/data" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_momentum.TestMomentumSignal.test_empty_df&quot;" />
+      <option name="_new_target" value="&quot;test_data_quality.TestCheckPriceData.test_bad_prices_raises&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_momentum.TestMomentumSignal.test_fast_higher_than_slow_raises" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data_quality.TestCheckPriceData.test_df_all_nan" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="alphadog" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/strategies" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/data" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_momentum.TestMomentumSignal.test_fast_higher_than_slow_raises&quot;" />
+      <option name="_new_target" value="&quot;test_data_quality.TestCheckPriceData.test_df_all_nan&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_momentum.TestMomentumSignal.test_multiple_column_df" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data_quality.TestCheckPriceData.test_empty_df" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="alphadog" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/strategies" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/data" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_momentum.TestMomentumSignal.test_multiple_column_df&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_momentum.TestMomentumSignal.test_single_column_df" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="alphadog" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/strategies" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_momentum.TestMomentumSignal.test_single_column_df&quot;" />
+      <option name="_new_target" value="&quot;test_data_quality.TestCheckPriceData.test_empty_df&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -138,26 +118,43 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;$PROJECT_DIR$&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest in test_data_quality.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="alphadog" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/unit/data" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/unit/data/test_data_quality.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python tests.pytest in alphadog" />
-      <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_single_column_df" />
-      <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_fast_higher_than_slow_raises" />
-      <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_empty_df" />
-      <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal" />
-      <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_multiple_column_df" />
+      <item itemvalue="Python tests.pytest in test_data_quality.py" />
+      <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_bad_columns_raises" />
+      <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_bad_prices_raises" />
+      <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_df_all_nan" />
+      <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_empty_df" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_multiple_column_df" />
-        <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_single_column_df" />
-        <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal" />
-        <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_fast_higher_than_slow_raises" />
-        <item itemvalue="Python tests.pytest for test_momentum.TestMomentumSignal.test_empty_df" />
+        <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_empty_df" />
+        <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_df_all_nan" />
+        <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_bad_prices_raises" />
+        <item itemvalue="Python tests.pytest for test_data_quality.TestCheckPriceData.test_bad_columns_raises" />
+        <item itemvalue="Python tests.pytest in test_data_quality.py" />
       </list>
     </recent_temporary>
   </component>
@@ -184,19 +181,93 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="725" y="373" key="#xdebugger.evaluate" timestamp="1590361352502">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state x="725" y="373" key="#xdebugger.evaluate/67.27.1853.1052@67.27.1853.1052" timestamp="1590361352502" />
+    <state width="1851" height="480" key="DebuggerActiveHint" timestamp="1590317478051">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1851" height="480" key="DebuggerActiveHint/67.27.1853.1052@67.27.1853.1052" timestamp="1590317478051" />
+    <state x="167" y="109" width="1653" height="862" key="DiffContextDialog" timestamp="1590411429189">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state x="167" y="109" width="1653" height="862" key="DiffContextDialog/67.27.1853.1052@67.27.1853.1052" timestamp="1590411429189" />
+    <state width="1830" height="277" key="GridCell.Tab.0.bottom" timestamp="1590412157442">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="277" key="GridCell.Tab.0.bottom/67.27.1853.1052@67.27.1853.1052" timestamp="1590412157442" />
+    <state width="1830" height="277" key="GridCell.Tab.0.center" timestamp="1590412157441">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="277" key="GridCell.Tab.0.center/67.27.1853.1052@67.27.1853.1052" timestamp="1590412157441" />
+    <state width="1830" height="277" key="GridCell.Tab.0.left" timestamp="1590412157439">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="277" key="GridCell.Tab.0.left/67.27.1853.1052@67.27.1853.1052" timestamp="1590412157439" />
+    <state width="1830" height="277" key="GridCell.Tab.0.right" timestamp="1590412157442">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="277" key="GridCell.Tab.0.right/67.27.1853.1052@67.27.1853.1052" timestamp="1590412157442" />
+    <state width="1830" height="343" key="GridCell.Tab.1.bottom" timestamp="1590411930077">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="343" key="GridCell.Tab.1.bottom/67.27.1853.1052@67.27.1853.1052" timestamp="1590411930077" />
+    <state width="1830" height="343" key="GridCell.Tab.1.center" timestamp="1590411930076">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="343" key="GridCell.Tab.1.center/67.27.1853.1052@67.27.1853.1052" timestamp="1590411930076" />
+    <state width="1830" height="343" key="GridCell.Tab.1.left" timestamp="1590411930076">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="343" key="GridCell.Tab.1.left/67.27.1853.1052@67.27.1853.1052" timestamp="1590411930076" />
+    <state width="1830" height="343" key="GridCell.Tab.1.right" timestamp="1590411930076">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="1830" height="343" key="GridCell.Tab.1.right/67.27.1853.1052@67.27.1853.1052" timestamp="1590411930076" />
+    <state width="926" height="531" key="XDebugger.FullValuePopup" timestamp="1590361347215">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state width="926" height="531" key="XDebugger.FullValuePopup/67.27.1853.1052@67.27.1853.1052" timestamp="1590361347215" />
+    <state x="540" y="244" width="903" height="584" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1590358723238">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state x="540" y="244" width="903" height="584" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/67.27.1853.1052@67.27.1853.1052" timestamp="1590358723238" />
+    <state x="683" y="287" width="621" height="586" key="find.popup" timestamp="1590410807077">
+      <screen x="67" y="27" width="1853" height="1052" />
+    </state>
+    <state x="683" y="287" width="621" height="586" key="find.popup/67.27.1853.1052@67.27.1853.1052" timestamp="1590410807077" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/unit/strategies/test_momentum.py</url>
-          <line>30</line>
-          <option name="timeStamp" value="1" />
+          <url>file://$PROJECT_DIR$/tests/unit/framework/test_portfolio.py</url>
+          <line>213</line>
+          <option name="timeStamp" value="86" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/unit/strategies/test_momentum.py</url>
-          <line>40</line>
-          <option name="timeStamp" value="2" />
+          <url>file://$PROJECT_DIR$/tests/unit/framework/test_portfolio.py</url>
+          <line>211</line>
+          <option name="timeStamp" value="88" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/alphadog/framework/portfolio.py</url>
+          <line>526</line>
+          <option name="timeStamp" value="89" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/alphadog/framework/portfolio.py</url>
+          <line>535</line>
+          <option name="timeStamp" value="90" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/unit/framework/test_portfolio.py</url>
+          <line>264</line>
+          <option name="timeStamp" value="91" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

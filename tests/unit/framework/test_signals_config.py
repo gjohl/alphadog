@@ -13,8 +13,6 @@ def test_parameterised_strategies():
 
 
 def test_get_price_df():
-    # TODO TEST mock the yfinance call
-    # mocker.patch.object('alphadog.data.retrieval.load_yfinance', return_value=mock_price)
     actual = get_price_df('FTSE100')
     assert all(actual.columns == ['close'])
     assert actual.index.dtype == 'datetime64[ns]'

@@ -10,7 +10,6 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
-- Add tests for TODO TEST placeholders
 - Flesh out portfolio framework and implement missing functionality
 - Try out some mean reversion strategies - from Algorithmic Trading
 - Add trading_capital csv, Handle reindexing trading_capital, calculating new capital to ffill etc
@@ -67,6 +66,7 @@ Keep track of ongoing work and priorities.
 - Fix Portfolio combine_subsystems - calc div_multiplier using Subsystem returns
 - Add tests for framework module: add Portfolio tests.
 - Make repr nice for  Portfolio, Subsystem, Forecast
+- Implement all outstanding tests
 
 
 ## To Read:

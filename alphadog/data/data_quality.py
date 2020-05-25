@@ -1,7 +1,9 @@
 from datetime import datetime
 
+import pandas as pd
+
 from alphadog.internals.exceptions import InputDataError
-from alphadog.data.constants import OHLCV_COLS
+from alphadog.data.constants import PRICE_COLS
 
 
 ######################
@@ -9,7 +11,8 @@ from alphadog.data.constants import OHLCV_COLS
 ######################
 
 def staleness(input_df):
-    """Returns the number of days since the last update.
+    """
+    Returns the number of days since the last update.
 
     Measures how up-to-date the data is.
 
@@ -23,6 +26,11 @@ def staleness(input_df):
     staleness_days: int
     Number of periods (days) since the last update in this data.
     """
+    if input_df.empty:
+        raise InputDataError("Cannot calculate staleness for an empty Dataframe.")
+    if not isinstance(input_df.index, pd.DatetimeIndex):
+        raise TypeError("Index must be a datetime.")
+
     today = datetime.today()
     most_recent_date = input_df.index.max()
     date_diff = today - most_recent_date
@@ -33,7 +41,7 @@ def staleness(input_df):
 
 def check_nonempty_dataframe(input_df, name):
     """
-    Run data quality checks for generic input data.
+    Check the input DataFrame is populated.
 
     Parameters
     ----------
@@ -42,19 +50,20 @@ def check_nonempty_dataframe(input_df, name):
     name: str, optional
        Name to identify object. Used to log errors.
 
-    Returns
-    -------
-    Return True if all tests pass, otherwise raise the appropriate error.
+    Raises
+    ------
+    InputDataError
+        Raises if the DataFrame is empty or all NaN.
     """
     if input_df.dropna(how='all').shape[0] == 0:
         raise InputDataError(f"No data for {name}")
 
-    return True
-
 
 def check_scalar_is_above_min_threshold(input_scalar, input_name, threshold):
     """
-    Check if a scalar is above a given threshold value. Raise if it is below.
+    Check if a scalar is greater than or equal to a given threshold value.
+
+    Raise if the input is below the given threshold.
 
     Parameters
     ----------
@@ -64,10 +73,6 @@ def check_scalar_is_above_min_threshold(input_scalar, input_name, threshold):
         Name of variable. Used for logging.
     threshold: int, float
         Threshold value that the input_scalar must be greater than or equal to.
-
-    Returns
-    -------
-    None
 
     Raises
     ------
@@ -94,21 +99,23 @@ def check_price_data(input_df, name):
     Parameters
     ----------
     input_df: pd.DataFrame
-       Input data.
+        Input data.
     name: str, optional
-       Name to identify object. Used to log errors.
+        Name to identify object. Used to log errors.
 
-    Returns
-    -------
-    Return True if all tests pass, otherwise raise the appropriate error.
+    Raises
+    ------
+    InputDataError
+        Raises if the DataFrame has negative values or incorrect columns
     """
+    check_nonempty_dataframe(input_df, name)
+
+    # TODO: make these generic tests and fix negative price failures
     # Check expected columns
-    # TODO: should we allow additional columns?
-    if not set(input_df.columns).issuperset(OHLCV_COLS):
+    if not set(input_df.columns).issuperset(PRICE_COLS):
         raise InputDataError(f"Incorrect columns for {name}")
 
     # Check valid prices - may need to rethink with futures prices which may go negative
-    if not all(input_df >= 0):
-        raise InputDataError(f"Found negative prices")
+    # if any(input_df < 0):
+    #     raise InputDataError(f"Found negative prices for {name}")
 
-    return True

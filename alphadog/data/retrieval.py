@@ -1,6 +1,7 @@
 """
 Functionality to get normalised data.
 """
+from alphadog.data.constants import PRICE_COLS
 from alphadog.data.data_quality import (
     staleness, check_nonempty_dataframe, check_price_data
 )
@@ -44,7 +45,7 @@ class BaseData:
            Name to assign to this data object
 
         Returns
-        -------
+        -------close
         :class:`BaseData`
             A BaseData object for the given input DataFrame.
         """
@@ -53,10 +54,10 @@ class BaseData:
 
 class PriceData(BaseData):
     """
-    Class for OHLCV data.
+    Class for price data.
     """
     def __init__(self, input_df, name=None):
-        price_df = input_df[['close']]  # TODO: make constants & tidy
+        price_df = input_df[PRICE_COLS]
         super().__init__(price_df, name)
         check_price_data(self.df, self.name)
 
