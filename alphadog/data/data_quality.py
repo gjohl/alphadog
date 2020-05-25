@@ -118,4 +118,3 @@ def check_price_data(input_df, name):
     # Check valid prices - may need to rethink with futures prices which may go negative
     # if any(input_df < 0):
     #     raise InputDataError(f"Found negative prices for {name}")
-

@@ -107,4 +107,3 @@ def mock_signal_list():
         columns=['SIG4']
     )
     return [sig1, sig2, sig3, sig4]
-

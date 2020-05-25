@@ -34,7 +34,7 @@ https://stackoverflow.com/questions/25670516/strange-overwriting-occurring-when-
 """
 from alphadog.data.retrieval import PriceData
 from alphadog.signals.trend import momentum_signal, breakout_signal
-from alphadog.signals.bias import long_bias_signal, short_bias_signal
+from alphadog.signals.bias import long_bias_signal
 
 
 ##############
@@ -46,7 +46,7 @@ PARAMETERISED_STRATEGIES = {}
 for speed in range(1, 7):
     fast = 2 ** speed
     slow = 4 * fast
-    sig = lambda price_df, fast=fast, slow=slow: momentum_signal(price_df, fast, slow)
+    sig = lambda price_df, fast=fast, slow=slow: momentum_signal(price_df, fast, slow)  # noqa: E731
     strategy_name = f"VMOM{speed}"
 
     temp_dict = {'signal_func': sig,
@@ -61,7 +61,8 @@ for speed in range(1, 7):
 # Breakout signals
 for speed in range(1, 7):
     lookback_period = 10 * 2 ** (speed-1)
-    sig = lambda price_df, lookback_period=lookback_period: breakout_signal(price_df, lookback_period)
+    sig = (lambda price_df, lookback_period=lookback_period:
+           breakout_signal(price_df, lookback_period))
     strategy_name = f"VBO{speed}"
 
     temp_dict = {'signal_func': sig,

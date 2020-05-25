@@ -6,7 +6,7 @@ from alphadog.framework.config_handler import Instrument
 instrument_config = {
     "FTSE100": {
         "traded_instrument": "LEGAL & GENERAL UK 100 INDEX TRUST",
-        "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/l/legal-and-general-uk-100-index-class-c-accumulation",
+        "traded_info_link": "URL/FTSE100",
         "cost": 6,
         "index": "FTSE 100",
         "instrument_id": "FTSE100",
@@ -16,11 +16,12 @@ instrument_config = {
         "is_traded": True,
         "hierarchy_1": "equity",
         "hierarchy_2": "uk",
-        "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
+        "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6",
+                    "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
         },
     "FTSE250": {
         "traded_instrument": "HSBC FTSE 250 INDEX",
-        "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/h/hsbc-ftse-250-index-class-s-accumulation",
+        "traded_info_link": "URL/FTSE250",
         "cost": 8,
         "index": "FTSE 250",
         "instrument_id": "FTSE250",
@@ -32,11 +33,12 @@ instrument_config = {
         "is_traded": True,
         "hierarchy_1": "equity",
         "hierarchy_2": "uk",
-        "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
+        "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6",
+                    "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
         },
     "FTSEAS": {
         "traded_instrument": "LEGAL & GENERAL UK INDEX",
-        "traded_info_link": "https://www.hl.co.uk/funds/fund-discounts,-prices--and--factsheets/search-results/l/legal-and-general-uk-index-class-c-accumulation",
+        "traded_info_link": "URL/FTSEAS",
         "cost": 4,
         "index": "FTSE All Share",
         "instrument_id": "FTSEAS",
@@ -46,7 +48,8 @@ instrument_config = {
         "is_traded": True,
         "hierarchy_1": "equity",
         "hierarchy_2": "uk",
-        "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6", "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
+        "signals": ["VMOM1", "VMOM2", "VMOM3", "VMOM4", "VMOM5", "VMOM6",
+                    "VBO1", "VBO2", "VBO3", "VBO4", "VBO5", "VBO6", "BLONG"]
     }
 }
 
@@ -103,6 +106,7 @@ strategy_config = {
               'strategy_name': "BLONG",
               'hierarchy_1': 'bias'}
 }
+
 
 @pytest.fixture
 def mock_strategy_config():

@@ -1,9 +1,6 @@
 """
 Functionality to handle FX conversions.
 """
-
-import pandas as pd
-
 from alphadog.data.retrieval import PriceData
 
 
