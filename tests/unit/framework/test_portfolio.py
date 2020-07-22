@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from alphadog.framework.config_handler import Instrument, Strategy
+from alphadog.framework.constants import VOL_TARGET, STARTING_CAPITAL
 from alphadog.framework.portfolio import (
     get_instrument_value_volatility, get_cash_vol_target_daily, get_vol_scalar,
     get_weights_from_config, get_diversification_multiplier, combine_signals,
@@ -37,7 +38,7 @@ class TestPortfolio:
         """Test a Portfolio instantiates with an input config."""
         actual = Portfolio(mock_instrument_config)
         assert actual.instrument_config == mock_instrument_config
-        assert actual.vol_target == 10
+        assert actual.vol_target == VOL_TARGET
 
     def test_instantiation_default_config(self):
         """Test a Portfolio instantiates with a default config."""
@@ -45,7 +46,7 @@ class TestPortfolio:
         assert 'UKGOV' in actual.instrument_config.keys()
         assert 'USGOV' in actual.instrument_config.keys()
         assert 'EUROGOV' in actual.instrument_config.keys()
-        assert actual.vol_target == 10
+        assert actual.vol_target == VOL_TARGET
 
     def test_instantiation_with_input_vol_target(self, mock_instrument_config):
         """Test a Portfolio instantiates with an input vol_target."""
@@ -113,7 +114,7 @@ class TestSubsystem:
         """Test a Subsystem instantiates with default vol_target."""
         actual = Subsystem(mock_instrument)
         assert actual.instrument_id == "FTSE100"
-        assert actual.vol_target == 10
+        assert actual.vol_target == VOL_TARGET
 
     @pytest.mark.parametrize('input_vol', [5, 10, 50])
     def test_instantiation_with_vol_target(self, mock_instrument, input_vol):
@@ -134,7 +135,7 @@ class TestSubsystem:
         assert list(actual.strategy_weights.keys()) == expected_strategies
         assert sum(actual.strategy_weights.values()) == 1.
         assert actual.fx_rate == 1.
-        assert actual.trading_capital == 10000.
+        assert actual.trading_capital == STARTING_CAPITAL
         assert not actual.converted_price.empty
 
     def test_data_fixtures(self, mock_instrument):
