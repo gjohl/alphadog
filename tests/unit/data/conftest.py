@@ -1,1 +1,1 @@
-from tests.mock.mock_data import mock_ohlcv  # noqa
+from tests.mock.mock_data import mock_ohlcv

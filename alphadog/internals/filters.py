@@ -2,9 +2,6 @@
 Generic timeseries filters.
 """
 
-import numpy as np
-import pandas as pd
-
 
 def cusum_filter(df, threshold):
     """

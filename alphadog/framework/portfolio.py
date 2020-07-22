@@ -8,7 +8,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from alphadog.internals.analytics import cross_sectional_mean, returns
+from alphadog.analytics.returns import returns, cross_sectional_mean
 from alphadog.internals.exceptions import InputDataError, DimensionMismatchError
 from alphadog.internals.fx import get_fx, convert_currency
 from alphadog.data.data_quality import (
@@ -22,7 +22,7 @@ from alphadog.framework.constants import (
     AVG_FORECAST, MIN_FORECAST, MAX_FORECAST,
     MAX_DIVERSIFICATION_MULTIPLIER, VOL_TARGET, VOL_SPAN,
     TRADING_DAYS_PER_YEAR, PORTFOLIO_CCY,
-    STARTING_CAPITAL, MAX_FFILL
+    STARTING_CAPITAL
 )
 from alphadog.framework.signals_config import DATA_FIXTURES
 from alphadog.framework.weights import STRATEGY_WEIGHTS, INSTRUMENT_WEIGHTS

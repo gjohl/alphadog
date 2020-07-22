@@ -12,34 +12,11 @@ internals: any generic calculations
 -- drawdowns
 -- autocorrelations
 -- Granger causality
+
+# TODO: add a robust vol calc that floors the vol at a rolling min value
 """
 import numpy as np
 import pandas as pd
-
-
-# TODO: add a robust vol calc that floors the vol at a rolling min value
-
-
-def cross_sectional_mean(df, name='combined'):
-    """
-    Aggregate multiple columns by taking the cross-sectional mean.
-
-    Parameters
-    ----------
-    df: pd.DataFrame
-        The DataFrame to aggregate.
-    name: str, optional.
-        Column name for the result DataFrame.
-
-    Returns
-    -------
-    pd.DataFrame
-        Single column DataFrame which is the mean of the input DataFrame
-    """
-    df_res = df.copy()
-    if isinstance(df, pd.Series):
-        df_res = df.to_frame(name)
-    return df_res.mean(axis=1).to_frame(name)
 
 
 def returns(price_df, return_type, percent=False):
@@ -117,3 +94,25 @@ def geometric_returns(price_df):
         Time series of returns per column of the input DataFrame.
     """
     return np.log(price_df) - np.log(price_df.shift())
+
+
+def cross_sectional_mean(df, name='combined'):
+    """
+    Aggregate multiple columns by taking the cross-sectional mean.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        The DataFrame to aggregate.
+    name: str, optional.
+        Column name for the result DataFrame.
+
+    Returns
+    -------
+    pd.DataFrame
+        Single column DataFrame which is the mean of the input DataFrame
+    """
+    df_res = df.copy()
+    if isinstance(df, pd.Series):
+        df_res = df.to_frame(name)
+    return df_res.mean(axis=1).to_frame(name)
