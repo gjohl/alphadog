@@ -45,7 +45,7 @@ class BaseData:
            Name to assign to this data object
 
         Returns
-        -------close
+        -------
         :class:`BaseData`
             A BaseData object for the given input DataFrame.
         """

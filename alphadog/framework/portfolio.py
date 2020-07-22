@@ -10,7 +10,7 @@ import pandas as pd
 
 from alphadog.internals.analytics import cross_sectional_mean, returns
 from alphadog.internals.exceptions import InputDataError, DimensionMismatchError
-from alphadog.internals.fx import get_fx
+from alphadog.internals.fx import get_fx, convert_currency
 from alphadog.data.data_quality import (
     check_scalar_is_above_min_threshold, check_nonempty_dataframe
 )
@@ -61,6 +61,7 @@ class Portfolio:
         self._diversification_multiplier = None
         self._pweights = None
         self._target_position = None
+        self._target_notional = None
 
     def __repr__(self):
         return f"Portfolio {self.__class__}\nContaining instruments: {self.traded_instruments}"
@@ -97,6 +98,11 @@ class Portfolio:
     def target_position(self):
         """pd.DataFrame: Target position for each instrument in the portfolio."""
         return self._target_position
+
+    @property
+    def target_notional(self):
+        """pd.DataFrame: Target GBP position for each instrument in the portfolio."""
+        return self._target_notional
 
     @property
     def traded_instruments(self):
@@ -183,11 +189,18 @@ class Portfolio:
         self._diversification_multiplier = div_multiplier
 
         # TODO: account for missing data, varying pweights
+        # Positions in number of shares
         subsystem_positions = [sub.subsystem_position for sub in self.subsystems]
         portfolio_positions_list = [x * y for x, y in zip(subsystem_positions, self.pweights)]
         portfolio_positions = pd.concat(portfolio_positions_list, axis=1)
-
         self._target_position = portfolio_positions * self.diversification_multiplier
+
+        # Positions in notional GBP
+        subsystem_prices = [sub.converted_price for sub in self.subsystems]
+        subsystem_cols = [sub.instrument_id for sub in self.subsystems]
+        prices = pd.concat(subsystem_prices, axis=1)
+        prices.columns = subsystem_cols
+        self._target_notional = self._target_position * prices
 
 
 class Subsystem:
@@ -297,6 +310,12 @@ class Subsystem:
             The multiplicative FX rate to convert this instrument to the portfolio currency.
         """
         return get_fx(self.currency, PORTFOLIO_CCY)
+
+    @property
+    def converted_price(self):
+        """pd.DataFrame: The instrument price converted to the portfolio currency.
+        """
+        return convert_currency(self.price_data.df, self.fx_rate)
 
     @property
     def instrument_id(self):
@@ -770,20 +789,11 @@ def get_instrument_value_volatility(price_df, fx_rate, asset_class='equity'):
     # Sanitise inputs
     assert block_value.shape[1] == 1
     check_nonempty_dataframe(block_value, 'block_value')
-    if isinstance(fx_rate, pd.DataFrame):
-        check_nonempty_dataframe(fx_rate, 'fx_rate')
-        assert fx_rate.shape[1] == 1
-        fx_reindexed = fx_rate.reindex(price_df.index)
-        fx_reindexed.columns = price_df.columns
-        fx_reindexed = fx_reindexed.ffill(limit=MAX_FFILL)  # ffill fx so we still have a signal
-    elif isinstance(fx_rate, (int, float)):
-        check_scalar_is_above_min_threshold(fx_rate, 'fx_rate', 0)
-        fx_reindexed = fx_rate
 
     price_returns = returns(price_df, 'arithmetic', percent=True)
     price_vol = price_returns.ewm(span=VOL_SPAN).std()  # TODO: support buffering price_vol
     instrument_currency_vol = block_value * price_vol
-    instrument_value_vol = instrument_currency_vol * fx_reindexed
+    instrument_value_vol = convert_currency(instrument_currency_vol, fx_rate)
     instrument_value_vol.columns = ['instrument_value_volatility']
     instrument_value_vol = instrument_value_vol.iloc[:, 0]
 

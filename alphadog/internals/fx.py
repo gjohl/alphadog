@@ -1,7 +1,13 @@
 """
 Functionality to handle FX conversions.
 """
+import pandas as pd
+
+from alphadog.data.data_quality import (
+    check_nonempty_dataframe, check_scalar_is_above_min_threshold
+)
 from alphadog.data.retrieval import PriceData
+from alphadog.framework.constants import MAX_FFILL
 
 
 def get_fx(from_ccy, to_ccy):
@@ -55,3 +61,35 @@ def get_fx(from_ccy, to_ccy):
         fx_df *= multiplier
 
     return fx_df
+
+
+def convert_currency(price_df, fx_rate):
+    """
+    Convert a price time series using the given FX rate.
+
+    Handles missing values, reshaping etc.
+
+    Parameters
+    ----------
+    price_df: pd.DataFrame
+        Price time series.
+    fx_rate: pd.DataFrame or float
+        Time series of FX rates.
+
+    Returns
+    -------
+    converted_df: pd.DataFrame
+        Time series of prices converted using the given FX rate.
+    """
+    if isinstance(fx_rate, pd.DataFrame):
+        check_nonempty_dataframe(fx_rate, 'fx_rate')
+        assert fx_rate.shape[1] == 1
+        fx_reindexed = fx_rate.reindex(price_df.index)
+        fx_reindexed.columns = price_df.columns
+        fx_reindexed = fx_reindexed.ffill(limit=MAX_FFILL)  # ffill fx so we still have a signal
+
+    elif isinstance(fx_rate, (int, float)):
+        check_scalar_is_above_min_threshold(fx_rate, 'fx_rate', 0)
+        fx_reindexed = fx_rate
+
+    return price_df * fx_reindexed

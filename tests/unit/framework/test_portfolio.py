@@ -135,6 +135,7 @@ class TestSubsystem:
         assert sum(actual.strategy_weights.values()) == 1.
         assert actual.fx_rate == 1.
         assert actual.trading_capital == 10000.
+        assert not actual.converted_price.empty
 
     def test_data_fixtures(self, mock_instrument):
         """Test the data fixtures of the Subsystem."""

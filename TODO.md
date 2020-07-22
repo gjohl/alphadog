@@ -10,6 +10,7 @@ Keep track of ongoing work and priorities.
 
 
 ## Plan
+- Lopez de Prado: cusum filter, triple barrier method, metalabeling
 - Flesh out portfolio framework and implement missing functionality
 - Try out some mean reversion strategies - from Algorithmic Trading
 - Add trading_capital csv, Handle reindexing trading_capital, calculating new capital to ffill etc
