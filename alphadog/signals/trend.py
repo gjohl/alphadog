@@ -48,9 +48,6 @@ def breakout_signal(df, lookback_period, smooth_period=None):
     A continuous breakout signal that indicates when the data is nearing an extreme relative
     to its recent history (rolling min or max).
 
-    Similar in concept to a stochastic oscillator or Donchian channel. Based on the idea discussed
-    in https://qoppac.blogspot.com/2016/05/a-simple-breakout-trading-rule.html?m=1
-
     The breakout rule is defined as the difference of the current value to the midpoint, scaled
     by the rolling_range of values, i.e.:
     rolling_midpoint = (rolling_max + rolling_min) / 2
@@ -69,9 +66,8 @@ def breakout_signal(df, lookback_period, smooth_period=None):
     breakout signal is intended to pick up signals on the horizon of its lookback speed.
     The smoothing is proportional to the lookback period unless otherwise specified.
 
-    10 days seems a sane starting point, also exactly two weeks in business days.
-    If I keep doubling I get 10,20,40,80,160 and 320 day lookbacks before we're getting a
-    little too slow.
+    The starting point of 10 days (2 business weeks) is reasonable.
+    Subsequent speeds are obtained by doubling the lookback, until it gets too slow.
 
     Parameters
     ----------
@@ -92,6 +88,12 @@ def breakout_signal(df, lookback_period, smooth_period=None):
     ------
     ParameterError
         Raises if the provided smooth_period is greater than the lookback_period.
+
+    References
+    ----------
+    Similar in concept to a stochastic oscillator or Donchian channel.
+    Based on the idea discussed in
+    https://qoppac.blogspot.com/2016/05/a-simple-breakout-trading-rule.html?m=1
     """
     if smooth_period is None:
         smooth_period = max(int(lookback_period / 4), 1)
