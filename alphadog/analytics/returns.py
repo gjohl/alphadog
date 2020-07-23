@@ -1,5 +1,5 @@
 """
-internals: any generic calculations
+Any generic calculations
 -- volatility
 -- beta
 -- correlation
@@ -12,8 +12,6 @@ internals: any generic calculations
 -- drawdowns
 -- autocorrelations
 -- Granger causality
-
-# TODO: add a robust vol calc that floors the vol at a rolling min value
 """
 import numpy as np
 import pandas as pd
@@ -96,23 +94,62 @@ def geometric_returns(price_df):
     return np.log(price_df) - np.log(price_df.shift())
 
 
-def cross_sectional_mean(df, name='combined'):
+# TODO TEST: check default values are sensible
+def robust_volatility(df, span=35, min_periods=10, abs_floor=0.0000000001,
+                      rolling_floor=True, floor_min_quant=0.05, floor_days=500,
+                      floor_min_periods=100, backfill=False):
     """
-    Aggregate multiple columns by taking the cross-sectional mean.
+    Robust exponential volatility calculation, assuming daily series of prices.
+
+    We apply an absolute floor and a rolling floor based on recent history.
 
     Parameters
     ----------
     df: pd.DataFrame
-        The DataFrame to aggregate.
-    name: str, optional.
-        Column name for the result DataFrame.
+        Time series to calculate volatility of.
+    span: int
+        Number of days in lookback for the N-day exponentially-weighted moving average.
+    min_periods: int
+        The minimum number of observations.
+    abs_floor: float
+        The size of absolute minimum.
+    rolling_floor: bool
+        Whether to apply a rolling quantile floor.
+    floor_min_quant: float
+        The quantile to use for the rolling floor, e.g. 0.05 corresponds to 5% vol.
+    floor_days: int
+        The number of days of lookback for calculating the rolling floor.
+    floor_min_periods: int
+        Minimum number of observations for the rolling floor. Until this is reached,
+        the floor is zero.
+    backfill: bool
+        Whether to backfill the start of the timeseries.
 
     Returns
     -------
-    pd.DataFrame
-        Single column DataFrame which is the mean of the input DataFrame
+    vol_floored: pd.DataFrame
+        Exponentially-weighted volatility with the given floors applied.
     """
-    df_res = df.copy()
-    if isinstance(df, pd.Series):
-        df_res = df.to_frame(name)
-    return df_res.mean(axis=1).to_frame(name)
+    # Floor values at a minimum absolute value
+    vol = df.ewm(span=span, min_periods=min_periods).std()
+    vol_abs_floor = vol.clip(lower=abs_floor)
+
+    if rolling_floor:
+        vol_rolling_floor = (vol
+                             .rolling(min_periods=floor_min_periods, window=floor_days)
+                             .quantile(quantile=floor_min_quant))
+        # Set this to zero for the first value then propagate forward, to ensure
+        # we always have a value
+        vol_rolling_floor.iloc[0, :] = 0.
+        vol_rolling_floor = vol_rolling_floor.ffill()
+        # Apply the rolling floor
+        vol_floored = pd.concat([vol_abs_floor, vol_rolling_floor], axis=1)
+        vol_floored = vol_floored.max(axis=1, skipna=False)
+    else:
+        vol_floored = vol_abs_floor
+
+    if backfill:
+        # Fill forwards first, as we only want to backfill NaNs at the start
+        vol_floored = vol_floored.fillna(method="ffill").fillna(method="bfill")
+
+    return vol_floored
