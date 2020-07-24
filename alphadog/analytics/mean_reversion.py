@@ -3,11 +3,12 @@ Functionality to test mean reversion and/or stationarity in time series.
 """
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
 
 from statsmodels.tsa.stattools import adfuller
 
 
-def augmented_dickey_fuller(df, significance_level=10):
+def augmented_dickey_fuller(df, significance_level=0.1):
     """
     Augmented Dickey-Fuller test for mean reversion.
 
@@ -15,13 +16,15 @@ def augmented_dickey_fuller(df, significance_level=10):
     ----------
     df: pandas.DataFrame
         Time series to test.
-    significance_level: {10, 5, 1}
-        Significance level percentage to use. Defaults to 10%
+    significance_level: float
+        Significance level percentage to use. Defaults to 0.1 (10%).
 
     Returns
     -------
     significant: bool
         Whether the time series is significant at the given significance level.
+    p_value: float
+        The p-value of the test statistic.
     test_stat: float
         The test statistic.
 
@@ -41,16 +44,12 @@ def augmented_dickey_fuller(df, significance_level=10):
     ----------
     Ernest Chan (2013), Quantitative Trading. pp 41-44.
     """
-    # TODO
     res = adfuller(df, maxlag=1, regression='c')
-    test_stat = res[0]
     p_value = res[1]
-    critical_stat = res[4][f"{significance_level}%"]
-    ic_best = res[5]
+    test_stat = res[0]
+    significant = p_value <= significance_level
 
-    significant = test_stat <= critical_stat
-
-    return significant, test_stat
+    return significant, p_value, test_stat
 
 
 def hurst_exponent(df):
@@ -60,7 +59,7 @@ def hurst_exponent(df):
     Parameters
     ----------
     df: pandas.DataFrame
-        Time series to test.
+        Log price time series to test.
 
     Returns
     -------
@@ -92,17 +91,33 @@ def hurst_exponent(df):
     # TODO: lags should be dynamic
     # TODO support multi-col timeseries? Maybe not worth it.
     lags = range(1, 100)
-    ts_variance = [np.nanvar(-df.diff(-lag)) for lag in lags]
+    ts_variance = [np.nanvar(df.diff(lag)) for lag in lags]
     linear_reg = np.polyfit(np.log(lags), np.log(ts_variance), 1)
 
     return linear_reg[0]
 
 
-def variance_test():
+def variance_ratio_test(df, lag=2, significance_level=0.1):
     """
+    Variance ratio test for the statistical significance of the Hurst exponent.
+
+    Parameters
+    ----------
+    df: pandas.DataFrame
+        Log price time series to test.
+    lag: int
+        Lag to check for significance. Defaults to 2, i.e. an AR(1) process.
+    significance_level: float
+        Significance level percentage to use. Defaults to 0.1 (10%).
 
     Returns
     -------
+    significant: bool
+        Whether the time series is significant at the given significance level.
+    p_value: float
+        The p-value of the test statistic.
+    test_stat: float
+        The test statistic.
 
     Notes
     -----
@@ -110,22 +125,45 @@ def variance_test():
     .. math:: var( z_t - z_{t-T} ) / T * var( z_t - z_{t-1} )
     is equal to 1
 
+    It is possible to standardise the statistic as:
+    sqrt(2*n) * (sigma_b^2 / sigma_a^2 - 1) / sqrt(2)
+    This follows a N(0,1) Normal distribution so Z-scores can be used to test the significance.
+    See ref [3].
+
     References
     ----------
-    Ernest Chan (2013), Quantitative Trading. pp 44-45.
+    [1] Ernest Chan (2013), Quantitative Trading. pp 44-45.
+    [2] https://medium.com/bluekiri/simple-stationarity-tests-on-time-series-ad227e2e6d48
+    [3] https://breakingdownfinance.com/finance-topics/finance-basics/variance-ratio-test/
     """
-    pass
+    variance_ratio = np.nanvar(df.diff(lag)) / (lag * np.nanvar(df.diff(1)))
+    num_obs = df.shape[0]
+    test_stat = np.sqrt(num_obs) * (variance_ratio - 1)
+    p_value = norm.sf(np.abs(test_stat))
+    significant = p_value <= significance_level
+
+    return significant, p_value, test_stat
 
 
 def mean_reversion_half_life(df):
     """
+    The half-life of a mean-reverting Ornstein-Uhlbeck process.
+
+    This is computed using a linear regression of return as the dependent variable
+    against previous price as the independent variable which gives lambda as the slope and mu as the
+    intercept.
+
+    The half-life is then calculated as -ln(2)/lambda .
 
     Parameters
     ----------
-    df
+    df: pandas.DataFrame
+        Time series to test.
 
     Returns
     -------
+    halflife: float
+        The half-life of the mean-reverting process.
 
     Notes
     -----
@@ -144,16 +182,29 @@ def mean_reversion_half_life(df):
     Rewriting in this way allows an analytical solution for the expectation of y_t:
     .. math:: y_bar = y_0 * exp(lambda * t) - mu / (lambda * (1 - exp(lambda *t)))
 
+    If lambda is negative the process is mean-reverting.
     Thus, the price decays exponentially to the value -mu/lambda
-    with a half-life of decay equal to -ln(2)/lambda
-
+    with a half-life of decay equal to -ln(2)/lambda .
     The half-life can then be used for the lookback of the mean-reverting signal.
 
     References
     ----------
     Ernest Chan (2013), Quantitative Trading. pp 46-48.
     """
-    pass
+    returns = df.diff().values.flatten()
+    lagged_price = df.shift().values.flatten()
+
+    # from statsmodels.regression.linear_model import OLS
+    # linear_model = OLS(returns, lagged_price, missing='drop')
+    # linear_model.fit()
+
+    linear_reg = np.polyfit(returns[1:], lagged_price[1:], 1)
+    slope = linear_reg[0]
+    if slope >= 0:
+        return np.nan
+    halflife = -np.log(2) / slope
+
+    return halflife
 
 
 def mean_reversion_signal():
@@ -168,6 +219,7 @@ def mean_reversion_signal():
     ----------
     Ernest Chan (2013), Quantitative Trading. pp 49.
     """
+    pass
 
 
 def cointegrated_augmented_dickey_fuller():
