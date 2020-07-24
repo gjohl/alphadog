@@ -1,6 +1,7 @@
 """
 Functionality to test mean reversion and/or stationarity in time series.
 """
+import numpy as np
 import pandas as pd
 
 from statsmodels.tsa.stattools import adfuller
@@ -63,6 +64,8 @@ def hurst_exponent(df):
 
     Returns
     -------
+    float
+        The Hurst exponent for the given timeseries.
 
     Notes
     -----
@@ -83,9 +86,16 @@ def hurst_exponent(df):
 
     References
     ----------
-    Ernest Chan (2013), Quantitative Trading. pp 41, 44-50.
+    [1] Ernest Chan (2013), Quantitative Trading. pp 41, 44-50.
+    [2] https://www.quantstart.com/articles/Basics-of-Statistical-Mean-Reversion-Testing/
     """
-    return
+    # TODO: lags should be dynamic
+    # TODO support multi-col timeseries? Maybe not worth it.
+    lags = range(1, 100)
+    ts_variance = [np.nanvar(-df.diff(-lag)) for lag in lags]
+    linear_reg = np.polyfit(np.log(lags), np.log(ts_variance), 1)
+
+    return linear_reg[0]
 
 
 def variance_test():
