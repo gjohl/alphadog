@@ -185,7 +185,7 @@ def mean_reversion_half_life(df):
     Notes
     -----
     In discrete-form, the Augmented Dickey-Fuller test assumes price changes follow the model:
-    .. math: \delta y_t = \lambda * y_{t-1} + \mu + E
+    .. math: delta y_t = lambda * y_{t-1} + mu + E
     where E is Gaussian noise
 
     Performing a linear regression of ( y_t - y_{t-1} ) as the dependent variable
