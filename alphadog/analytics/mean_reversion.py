@@ -4,8 +4,14 @@ Functionality to test mean reversion and/or stationarity in time series.
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
+import statsmodels.api as sm
+from statsmodels.tsa.stattools import adfuller, coint
+from statsmodels.tsa.vector_ar.vecm import coint_johansen
 
-from statsmodels.tsa.stattools import adfuller
+from alphadog.internals.exceptions import InputDataError, ParameterError
+
+
+ALLOWED_JOHANSEN_SIGNIFICANCE = {0.1, 0.05, 0.01}
 
 
 def augmented_dickey_fuller(df, significance_level=0.1):
@@ -45,14 +51,14 @@ def augmented_dickey_fuller(df, significance_level=0.1):
     Ernest Chan (2013), Quantitative Trading. pp 41-44.
     """
     res = adfuller(df, maxlag=1, regression='c')
-    p_value = res[1]
     test_stat = res[0]
+    p_value = res[1]
     significant = p_value <= significance_level
 
     return significant, p_value, test_stat
 
 
-def hurst_exponent(df):
+def hurst_exponent(df, min_lags=100):
     """
     Hurst exponent of a time series, indicating stationarity.
 
@@ -60,6 +66,9 @@ def hurst_exponent(df):
     ----------
     df: pandas.DataFrame
         Log price time series to test.
+    min_lags: int
+        The minimum number of lags to use to calculate the Hurst exponent.
+        If the given time series is shorter than this, raise an error.
 
     Returns
     -------
@@ -88,13 +97,21 @@ def hurst_exponent(df):
     [1] Ernest Chan (2013), Quantitative Trading. pp 41, 44-50.
     [2] https://www.quantstart.com/articles/Basics-of-Statistical-Mean-Reversion-Testing/
     """
-    # TODO: lags should be dynamic
-    # TODO support multi-col timeseries? Maybe not worth it.
-    lags = range(1, 100)
-    ts_variance = [np.nanvar(df.diff(lag)) for lag in lags]
-    linear_reg = np.polyfit(np.log(lags), np.log(ts_variance), 1)
+    # Get the number of lags to use
+    num_obs = df.shape[0]
+    max_lags = max(min_lags, num_obs // 4)
+    if num_obs <= min_lags:
+        raise InputDataError(f"Number of observations ({num_obs}) is less than the required"
+                             f"minimum number of lags ({min_lags})")
 
-    return linear_reg[0]
+    # Linear regression of variance against lag
+    lags = range(1, max_lags)
+    ts_variance = [np.nanvar(df.diff(lag)) for lag in lags]
+    linear_model = sm.OLS(np.log(ts_variance), np.log(lags))
+    results = linear_model.fit()
+    slope = results.params[0]
+
+    return slope * 0.5
 
 
 def variance_ratio_test(df, lag=2, significance_level=0.1):
@@ -191,15 +208,15 @@ def mean_reversion_half_life(df):
     ----------
     Ernest Chan (2013), Quantitative Trading. pp 46-48.
     """
-    returns = df.diff().values.flatten()
-    lagged_price = df.shift().values.flatten()
+    returns = df.diff()
+    lagged_price = df.shift()
+    lagged_price = sm.add_constant(lagged_price)
 
-    # from statsmodels.regression.linear_model import OLS
-    # linear_model = OLS(returns, lagged_price, missing='drop')
-    # linear_model.fit()
+    linear_model = sm.OLS(returns, lagged_price, missing='drop')
+    results = linear_model.fit()
+    coefficients = results.params.values
+    slope = coefficients[1]
 
-    linear_reg = np.polyfit(returns[1:], lagged_price[1:], 1)
-    slope = linear_reg[0]
     if slope >= 0:
         return np.nan
     halflife = -np.log(2) / slope
@@ -207,8 +224,135 @@ def mean_reversion_half_life(df):
     return halflife
 
 
+def cointegrated_augmented_dickey_fuller(df1, df2, significance_level=0.1):
+    """
+    Determine the stationarity of a combination of two time series.
+
+    This also determines the hedge ratio, i.e. what proportion to combine the two securities in
+    to create a stationary signal. This is useful for pairs trading of spreads.
+
+    df1: pd.DataFrame
+        One of two time series to test. This will typically be log prices.
+    df2: pd.DataFrame
+        One of two time series to test. This will typically be log prices.
+    significance_level: float
+        Significance level percentage to use. Defaults to 0.1 (10%).
+
+    Returns
+    -------
+    significant: bool
+        Whether the time series is significant at the given significance level.
+    p_value: float
+        The p-value of the test statistic.
+    test_stat: float
+        The test statistic.
+
+    Notes
+    -----
+    The steps for a cointegrated ADF test are essentially:
+    1. Perform a linear regression of the two time series to find the optimal hedge ratio.
+    2. Create a portfolio of the two timeseries
+    3. Perform an ADF test on the portfolio.
+
+    The results are order-dependent and the hedge ratio is typically quite volatile.
+
+    References
+    ----------
+    [1] Ernest Chan (2013), Quantitative Trading. pp 51-54.
+    [2] https://medium.com/bluekiri/cointegration-tests-on-time-series-88702ea9c492
+    """
+    comb_df = pd.concat([df1, df2], axis=1).dropna()
+    res = coint(comb_df.iloc[:, 0], comb_df.iloc[:, 1], trend='c')
+    test_stat = res[0]
+    p_value = res[1]
+    significant = p_value <= significance_level
+
+    return significant, p_value, test_stat
+
+
+def johansen_test(combined_df, significance_level=0.1, method='eigen'):
+    """
+    Determine the stationarity of a combination of an arbitrary number of time series.
+
+    Also gives the eignevector which is the optimal hedge ratio for the largest eigenvalue
+    which represents the "strongest" mean reversion.
+
+    Parameters
+    ----------
+    combined_df: NxM pd.DataFrame
+        Combined DataFrame of all time series we wish to test for stationarity.
+    significance_level: {0.1, 0.05, 0.01}
+        Significance level percentage to use. Defaults to 0.1 (10%).
+    method: {'eigen', 'trace}
+        Method used to determine significance. Defaults to 'eigen'.
+
+    Returns
+    -------
+    significant: bool
+        Whether the time series is significant at the given significance level.
+    test_stat: float
+        The test statistic.
+    eigenvalue: float
+        The eigenvalue of the "strongest" combination.
+    eigenvector: 1xM np.array
+        The eignevector representing the optimal hedge ratio between the given time series.
+
+    Examples
+    --------
+    significant, test_stat, eigenvalue, eigenvector = johansen_test(combined_df)
+    stationary_df = comb_df.iloc[:, 0] * eigenvector[0] + comb_df.iloc[:, 1] * eigenvector[1]
+
+
+    Notes
+    -----
+    Unlike the cointegrated augmented Dickey-Fuller test, the Johansen test can be applied
+    to an arbitrary number of input signals and is not sensitive to the ordering.
+
+    The rank of the matrix of input signals gives the number of independent portfolios that can
+    be formed. This is calculated in two ways: using the trace statistics and using the eigenvalues.
+
+    We choose the eigenvalues/eigenvectors corresponding to the largest eigenvalue as this
+    represents the "strongest" mean reversion.
+
+    References
+    ----------
+    [1] Ernest Chan (2013), Quantitative Trading. pp 54-58.
+    [2] https://medium.com/bluekiri/cointegration-tests-on-time-series-88702ea9c492
+    [3] https://blog.quantinsti.com/johansen-test-cointegration-building-stationary-portfolio/
+    """
+    if significance_level not in ALLOWED_JOHANSEN_SIGNIFICANCE:
+        raise ParameterError(f"significance_level must be in {ALLOWED_JOHANSEN_SIGNIFICANCE}. "
+                             f"Got {significance_level}")
+
+    # Johansen test with constant term but no linear trend, 1 lagged value allowed.
+    result = coint_johansen(combined_df, det_order=0, k_ar_diff=1)
+
+    # Test for significance
+    if method == 'eigen':
+        critical_array = result.max_eig_stat_crit_vals
+        test_stat = result.max_eig_stat[0]
+    elif method == 'trace':
+        critical_array = result.trace_stat_crit_vals
+        test_stat = result.trace_stat[0]
+    else:
+        raise ParameterError(f"method must be 'eigen' or 'trace'. Got {method}")
+
+    sig_level_to_index_map = {0.1: 0, 0.05: 1, 0.01: 2}
+    critical_index = sig_level_to_index_map[significance_level]
+    critical_value = critical_array[0, critical_index]
+    significant = test_stat >= critical_value
+
+    # Get the optimal eigenvalue and eigenvector
+    eigenvalue = result.eig[0]
+    eigenvector = result.evec[:, 0]
+
+    return significant, test_stat, eigenvalue, eigenvector
+
+
 def mean_reversion_signal():
     """
+    Mean reversion signal.
+
     # TODO: move to signals once this is robust
     Opposite sign of momentum signal, with lookback span equal to the half-life of mean-reversion.
 
@@ -218,36 +362,5 @@ def mean_reversion_signal():
     References
     ----------
     Ernest Chan (2013), Quantitative Trading. pp 49.
-    """
-    pass
-
-
-def cointegrated_augmented_dickey_fuller():
-    """
-    Determine the stationarity of a combination of two time series.
-
-    This also determines the hedge ratio, i.e. what proportion to combine the two securities in
-    to create a stationary signal. This is useful for pairs trading of spreads.
-
-    Returns
-    -------
-
-    References
-    ----------
-    Ernest Chan (2013), Quantitative Trading. pp 51-54.
-    """
-    pass
-
-
-def johansen_test():
-    """
-    Determine the stationarity of a combination of an arbitrary number of time series.
-
-    Returns
-    -------
-
-    References
-    ----------
-    Ernest Chan (2013), Quantitative Trading. pp 54-58.
     """
     pass
