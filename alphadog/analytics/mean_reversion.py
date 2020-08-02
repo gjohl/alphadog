@@ -295,7 +295,7 @@ def johansen_test(combined_df, significance_level=0.1, method='eigen'):
     eigenvalue: float
         The eigenvalue of the "strongest" combination.
     eigenvector: 1xM np.array
-        The eignevector representing the optimal hedge ratio between the given time series.
+        The eigenvector representing the optimal hedge ratio between the given time series.
 
     Examples
     --------

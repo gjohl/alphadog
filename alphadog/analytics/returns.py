@@ -153,3 +153,80 @@ def robust_volatility(df, span=35, min_periods=10, abs_floor=0.0000000001,
         vol_floored = vol_floored.fillna(method="ffill").fillna(method="bfill")
 
     return vol_floored
+
+
+# TODO TEST
+def frac_diff_returns(df, fraction, threshold):
+    """
+    Calculate fractionally-differentiated returns as described in Lopez de Prado (2018).
+
+    This uses the fixed window method, removing any weights below the given threshold. This
+    avoids negative drift caused by a potentially long warm-up period.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        Time series to process.
+    fraction: float
+        Determines how much the price series is differentiated. Must be a non-negative value.
+    threshold: float
+        Minimum weight below which we ignore further terms.
+
+    Returns
+    -------
+    res_df: pd.DataFrame
+        Time series of fractionally differentiated features.
+
+    Notes
+    -----
+    Typical returns (corresponding to fraction=1) are stationary but also memory-less.
+    Fractional differentiation can remove just enough of the trend to make the price series
+    stationary, without "over-differencing" the series to the point where all memory is lost.
+
+    References
+    ----------
+    [1] Marcos Lopez de Prado (2018), Advances in Financial Machine Learning. pp 77-84.
+    """
+    weights = _get_frac_diff_weights(fraction, threshold)[::-1]
+    window_size = len(weights)
+
+    df_list = []
+    for col in df.columns:
+        series = df[col]
+        tmp_res = series.dropna().rolling(window_size).apply(lambda block: (block * weights).sum())
+        df_list.append(tmp_res)
+
+    res_df = pd.concat(df_list, axis=1)
+
+    return res_df
+
+
+# TODO TEST
+def _get_frac_diff_weights(fraction, threshold=0.01, max_num_weights=100):
+    """
+    Calculate the fractionally-differentiated weights for a given fraction.
+
+    These are thr binomial coefficients as described on page 77 of AFML.
+
+    Parameters
+    ----------
+    fraction: float
+        Determines how much the price series is differentiated. Must be a non-negative value.
+    threshold: float
+        Minimum weight below which we ignore further terms.
+    max_num_weights: int
+        The maximum number of weight terms allowed.
+
+    Returns
+    -------
+    weights: list
+        Weights used to calculate fractionally-differentiated features for the given fraction.
+    """
+    weights = [1.]
+    for k in range(1, max_num_weights):
+        weight_k = -weights[-1] * (fraction - k + 1) / k
+        if np.abs(weight_k) <= threshold:
+            break
+        weights.append(weight_k)
+
+    return weights
