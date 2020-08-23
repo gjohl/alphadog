@@ -8,7 +8,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from alphadog.analytics.returns import returns
+from alphadog.analytics.performance import returns
 from alphadog.analytics.aggregation import cross_sectional_mean
 from alphadog.internals.exceptions import InputDataError, DimensionMismatchError
 from alphadog.internals.fx import get_fx, convert_currency

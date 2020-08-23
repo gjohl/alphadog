@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from alphadog.analytics.returns import returns, arithmetic_returns, geometric_returns
+from alphadog.analytics.performance import returns, arithmetic_returns, geometric_returns
 
 
 @pytest.fixture
